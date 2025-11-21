@@ -28,7 +28,7 @@ const MapComponent = dynamic(() => import('../components/MapComponent'), {
 
 export default function Home() {
     // NextAuth Session
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
     const user = session?.user;
 
     // Global State
