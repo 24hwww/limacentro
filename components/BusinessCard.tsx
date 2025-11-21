@@ -35,19 +35,6 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick, i
             </span>
             <h3 className="font-bold text-gray-900 truncate">{business.name}</h3>
           </div>
-          <div className="flex gap-0.5" title="Calificación">
-            {RATING_OPTIONS.map((option) => (
-              <span
-                key={option.value}
-                className={`text-lg transition-all ${business.rating === option.value
-                    ? 'opacity-100'
-                    : 'opacity-30 grayscale'
-                  }`}
-              >
-                {option.emoji}
-              </span>
-            ))}
-          </div>
         </div>
 
         <div className="flex items-center mt-1 text-gray-500 text-sm">
@@ -55,9 +42,19 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick, i
           <span className="truncate">{business.district}</span>
         </div>
 
-        <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-          {business.description}
-        </p>
+        <div className="flex gap-1 mt-3" title="Calificación">
+          {RATING_OPTIONS.map((option) => (
+            <span
+              key={option.value}
+              className={`text-xl transition-all ${business.rating === option.value
+                ? 'opacity-100 scale-110'
+                : 'opacity-20 grayscale'
+                }`}
+            >
+              {option.emoji}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
