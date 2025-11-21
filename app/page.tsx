@@ -27,7 +27,7 @@ const MapComponent = dynamic(() => import('../components/MapComponent'), {
 });
 
 export default function Home() {
-    // NextAuth Session
+    // NextAuth Session (Edge compatible)
     const { data: session } = useSession();
     const user = session?.user;
 
