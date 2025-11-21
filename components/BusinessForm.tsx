@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { LIMA_DISTRICTS, CATEGORIES } from '../constants';
-import { geocodeAddress } from '../services/geocodingService';
-import { generateBusinessDescription } from '../services/geminiService';
-import { Business } from '../types';
+import { LIMA_DISTRICTS, CATEGORIES, RATING_OPTIONS } from '../constants';
+import { geocodeAddress } from '../lib/geocodingService';
+import { generateBusinessDescription } from '../lib/geminiService';
+import { Business, RatingEmoji } from '../types';
 import { Loader2, Wand2, MapPin, Save, X } from 'lucide-react';
 
 interface BusinessFormProps {
@@ -23,10 +23,10 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
     description: '',
     phone: '',
     website: '',
-    rating: 5, // Default rating
+    rating: '👍', // Default rating
   });
 
-  const [previewCoords, setPreviewCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [previewCoords, setPreviewCoords] = useState<{ lat: number, lng: number } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,12 +37,16 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
     }
   };
 
+  const handleRatingChange = (rating: RatingEmoji) => {
+    setFormData(prev => ({ ...prev, rating }));
+  };
+
   const handleGeocode = async () => {
     if (!formData.address || !formData.district) {
       setError("Por favor ingresa una dirección y selecciona un distrito.");
       return;
     }
-    
+
     setLoadingGeo(true);
     setError(null);
     try {
@@ -92,8 +96,8 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
     }
 
     const newBusiness: Business = {
-      id: crypto.randomUUID(),
       ...formData as Business,
+      id: crypto.randomUUID(),
       lat: previewCoords.lat,
       lng: previewCoords.lng,
       imageUrl: `https://picsum.photos/seed/${formData.name}/400/300` // Random image for demo
@@ -157,6 +161,30 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
               </select>
             </div>
           </div>
+
+          {/* Rating Selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Calificación Inicial</label>
+            <div className="flex gap-2">
+              {RATING_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleRatingChange(option.value as RatingEmoji)}
+                  className={`
+                    p-2 rounded-lg text-2xl transition-all border
+                    ${formData.rating === option.value
+                      ? 'bg-blue-50 border-blue-500 scale-110 shadow-sm'
+                      : 'bg-white border-gray-200 hover:bg-gray-50 grayscale opacity-70 hover:opacity-100 hover:grayscale-0'
+                    }
+                  `}
+                  title={option.label}
+                >
+                  {option.emoji}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Location Section */}
@@ -165,7 +193,7 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
             <MapPin className="w-4 h-4 mr-2" /> Ubicación
           </h3>
           <div className="space-y-3">
-             <div>
+            <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Dirección (Incluir Av./Jr./Calle y número)</label>
               <div className="flex gap-2">
                 <input
@@ -186,12 +214,12 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
                   {loadingGeo ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Ubicar'}
                 </button>
               </div>
-             </div>
-             {previewCoords && (
-               <div className="text-xs text-green-600 font-medium flex items-center bg-green-50 p-2 rounded">
-                 ✓ Coordenadas encontradas: {previewCoords.lat.toFixed(4)}, {previewCoords.lng.toFixed(4)}
-               </div>
-             )}
+            </div>
+            {previewCoords && (
+              <div className="text-xs text-green-600 font-medium flex items-center bg-green-50 p-2 rounded">
+                ✓ Coordenadas encontradas: {previewCoords.lat.toFixed(4)}, {previewCoords.lng.toFixed(4)}
+              </div>
+            )}
           </div>
         </div>
 
@@ -232,7 +260,7 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
             />
           </div>
           <div>
-             <label className="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
             <input
               type="url"
               name="website"
@@ -245,7 +273,7 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
         </div>
 
         <div className="pt-4 flex gap-3">
-           <button
+          <button
             type="button"
             onClick={onCancel}
             className="flex-1 px-4 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"

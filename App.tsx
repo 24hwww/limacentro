@@ -44,16 +44,16 @@ const App: React.FC = () => {
   // Global State
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [user, setUser] = useState<User | null>(null);
-  
+
   // View State
   const [viewState, setViewState] = useState<ViewState>('LIST');
-  const [showSidebarMobile, setShowSidebarMobile] = useState(true); 
-  
+  const [showSidebarMobile, setShowSidebarMobile] = useState(true);
+
   // Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  
+
   // Map State
   const [mapCenter, setMapCenter] = useState<Coordinates>(LIMA_CENTER);
   const [activeBusinessId, setActiveBusinessId] = useState<string | null>(null);
@@ -67,17 +67,17 @@ const App: React.FC = () => {
   // Filter Logic
   const filteredBusinesses = useMemo(() => {
     return businesses.filter(b => {
-      const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            b.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDistrict = selectedDistrict ? b.district === selectedDistrict : true;
       const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
       return matchesSearch && matchesDistrict && matchesCategory;
     });
   }, [businesses, searchQuery, selectedDistrict, selectedCategory]);
 
-  const selectedBusiness = useMemo(() => 
-    businesses.find(b => b.id === activeBusinessId), 
-  [businesses, activeBusinessId]);
+  const selectedBusiness = useMemo(() =>
+    businesses.find(b => b.id === activeBusinessId),
+    [businesses, activeBusinessId]);
 
   // Handlers
   const handleLogin = () => {
@@ -95,7 +95,7 @@ const App: React.FC = () => {
     setActiveBusinessId(b.id);
     setViewState('DETAILS');
     if (window.innerWidth < 768) {
-        setShowSidebarMobile(false); // On mobile, hide sidebar to show map and bottom sheet
+      setShowSidebarMobile(false); // On mobile, hide sidebar to show map and bottom sheet
     }
   };
 
@@ -117,13 +117,13 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden bg-gray-50 font-sans text-gray-900">
-      
+
       {/* MAP AREA (Left/Top) */}
       <div className="relative w-full h-full md:w-[65%] lg:w-[70%] z-0">
-        <MapContainer 
-          center={[LIMA_CENTER.lat, LIMA_CENTER.lng]} 
-          zoom={12} 
-          scrollWheelZoom={true} 
+        <MapContainer
+          center={[LIMA_CENTER.lat, LIMA_CENTER.lng]}
+          zoom={12}
+          scrollWheelZoom={true}
           zoomControl={false}
           style={{ height: '100%', width: '100%' }}
         >
@@ -133,10 +133,10 @@ const App: React.FC = () => {
           />
           <MapController center={mapCenter} />
           <MapClickHandler onMapClick={handleMapBackgroundClick} />
-          
+
           {filteredBusinesses.map(b => (
-            <Marker 
-              key={b.id} 
+            <Marker
+              key={b.id}
               position={[b.lat, b.lng]}
               eventHandlers={{
                 click: (e) => {
@@ -149,7 +149,7 @@ const App: React.FC = () => {
         </MapContainer>
 
         {/* Mobile Toggle Button (Floating) */}
-        <button 
+        <button
           onClick={toggleSidebar}
           className="md:hidden absolute top-4 right-4 z-[999] bg-white text-gray-700 p-3 rounded-full shadow-lg border border-gray-200"
         >
@@ -158,7 +158,7 @@ const App: React.FC = () => {
       </div>
 
       {/* SIDEBAR AREA (Right/Bottom) */}
-      <div 
+      <div
         className={`
           fixed inset-0 md:static z-10 bg-white md:w-[35%] lg:w-[30%] h-full flex flex-col shadow-2xl transition-transform duration-300 transform
           ${showSidebarMobile ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}
@@ -168,20 +168,19 @@ const App: React.FC = () => {
         {/* HEADER */}
         <div className="p-4 bg-white border-b border-gray-200 flex justify-between items-center shadow-sm flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="bg-red-600 text-white p-1.5 rounded font-bold tracking-tighter text-lg">LC</div>
             <h1 className="text-xl font-bold tracking-tight text-gray-900">LIMACENTRO</h1>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {user ? (
-               <div className="flex items-center gap-2">
-                  <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full border border-gray-200" />
-                  <button onClick={handleLogout} className="text-gray-400 hover:text-red-600">
-                    <LogOut className="w-5 h-5" />
-                  </button>
-               </div>
+              <div className="flex items-center gap-2">
+                <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full border border-gray-200" />
+                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600">
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
             ) : (
-              <button 
+              <button
                 onClick={handleLogin}
                 className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-full transition-colors"
               >
@@ -194,18 +193,18 @@ const App: React.FC = () => {
 
         {/* CONTENT SWITCHER */}
         <div className="flex-1 overflow-hidden relative">
-          
+
           {/* VIEW: ADD BUSINESS */}
           {viewState === 'ADD_BUSINESS' ? (
-            <BusinessForm 
+            <BusinessForm
               onCancel={() => setViewState('LIST')}
               onSave={handleSaveBusiness}
             />
           ) : (
-            
+
             /* VIEW: LIST / DETAILS */
             <div className="h-full flex flex-col">
-              
+
               {/* SEARCH & FILTER BAR */}
               <div className="p-4 space-y-3 bg-white border-b border-gray-100 flex-shrink-0">
                 <div className="relative">
@@ -218,9 +217,9 @@ const App: React.FC = () => {
                     className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
                   />
                 </div>
-                
+
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                  <select 
+                  <select
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
                     className="text-xs border border-gray-300 rounded px-2 py-1.5 bg-white min-w-[100px]"
@@ -228,8 +227,8 @@ const App: React.FC = () => {
                     <option value="">Todos los distritos</option>
                     {LIMA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
-                  
-                  <select 
+
+                  <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="text-xs border border-gray-300 rounded px-2 py-1.5 bg-white min-w-[100px]"
@@ -242,16 +241,16 @@ const App: React.FC = () => {
 
               {/* ACTION BAR (Add Business) */}
               {user && (
-                 <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex justify-between items-center flex-shrink-0">
-                    <span className="text-xs font-semibold text-blue-800">¿Tienes un negocio?</span>
-                    <button 
-                      onClick={() => setViewState('ADD_BUSINESS')}
-                      className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm"
-                    >
-                      <Plus className="w-3 h-3" />
-                      Registrar Gratis
-                    </button>
-                 </div>
+                <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex justify-between items-center flex-shrink-0">
+                  <span className="text-xs font-semibold text-blue-800">¿Tienes un negocio?</span>
+                  <button
+                    onClick={() => setViewState('ADD_BUSINESS')}
+                    className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Registrar Gratis
+                  </button>
+                </div>
               )}
 
               {/* SCROLLABLE LIST */}
@@ -266,9 +265,9 @@ const App: React.FC = () => {
                       {filteredBusinesses.length} Resultados en Lima
                     </div>
                     {filteredBusinesses.map(b => (
-                      <BusinessCard 
-                        key={b.id} 
-                        business={b} 
+                      <BusinessCard
+                        key={b.id}
+                        business={b}
                         onClick={handleBusinessClick}
                         isActive={activeBusinessId === b.id}
                       />
@@ -283,9 +282,9 @@ const App: React.FC = () => {
 
       {/* DETAIL OVERLAY (Mobile Bottom Sheet / Desktop Modal) */}
       {selectedBusiness && (
-        <BusinessDetailView 
-          business={selectedBusiness} 
-          onClose={() => setActiveBusinessId(null)} 
+        <BusinessDetailView
+          business={selectedBusiness}
+          onClose={() => setActiveBusinessId(null)}
         />
       )}
 
