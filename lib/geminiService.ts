@@ -42,7 +42,7 @@ export const generateBusinessDescription = async (
       contents: prompt,
     });
 
-    return response.text.trim();
+    return response.text?.trim() || `Un excelente ${category.toLowerCase()} ubicado en ${district}.`;
   } catch (error) {
     console.error("Error generating description with Gemini:", error);
     return `Un excelente ${category.toLowerCase()} ubicado en ${district}.`;
