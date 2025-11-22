@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useSession, signOut } from 'next-auth/react';
 import { Business, ViewState, Coordinates } from '../types';
 import { LIMA_CENTER, LIMA_DISTRICTS, CATEGORIES } from '../constants';
-import { getBusinesses, addBusiness } from '../lib/mockDatabase';
+import { apiService } from '../lib/apiService';
 import { BusinessCard } from '../components/BusinessCard';
 import { BusinessForm } from '../components/BusinessForm';
 import { BusinessDetailView } from '../components/BusinessDetailView';
@@ -50,7 +50,15 @@ export default function Home() {
 
     // Initialize
     useEffect(() => {
-        setBusinesses(getBusinesses());
+        const loadBusinesses = async () => {
+            try {
+                const data = await apiService.getBusinesses();
+                setBusinesses(data);
+            } catch (error) {
+                console.error("Failed to load businesses", error);
+            }
+        };
+        loadBusinesses();
     }, []);
 
     // Filter Logic
@@ -86,13 +94,20 @@ export default function Home() {
         setActiveBusinessId(null);
     };
 
-    const handleSaveBusiness = (newBusiness: Business) => {
-        const updated = addBusiness(newBusiness);
-        setBusinesses(updated);
-        setViewState('LIST');
-        // Focus on new business
-        setMapCenter({ lat: newBusiness.lat, lng: newBusiness.lng });
-        setActiveBusinessId(newBusiness.id);
+    const handleSaveBusiness = async (newBusiness: Business) => {
+        try {
+            // Remove ID as backend generates it
+            const { id, ...businessData } = newBusiness;
+            const savedBusiness = await apiService.createBusiness(businessData);
+            setBusinesses(prev => [savedBusiness, ...prev]);
+            setViewState('LIST');
+            // Focus on new business
+            setMapCenter({ lat: savedBusiness.lat, lng: savedBusiness.lng });
+            setActiveBusinessId(savedBusiness.id);
+        } catch (error) {
+            console.error("Failed to save business", error);
+            alert("Error al guardar el negocio");
+        }
     };
 
     // Mobile Toggle
