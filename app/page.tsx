@@ -255,7 +255,7 @@ export default function Home() {
                                     </div>
                                 ) : (
                                     <div>
-                                        <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0">
+                                        <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 z-10">
                                             {filteredBusinesses.length} Resultados en Lima
                                         </div>
                                         {filteredBusinesses.map(b => (

@@ -42,18 +42,17 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick, i
           <span className="truncate">{business.district}</span>
         </div>
 
-        <div className="flex gap-1 mt-3" title="Calificación">
-          {RATING_OPTIONS.map((option) => (
-            <span
-              key={option.value}
-              className={`text-xl transition-all ${business.rating === option.value
-                ? 'opacity-100 scale-110'
-                : 'opacity-20 grayscale'
-                }`}
-            >
-              {option.emoji}
-            </span>
-          ))}
+        <div className="flex items-center gap-2 mt-3">
+          {(() => {
+            const rating = RATING_OPTIONS.find(r => r.value === business.rating);
+            if (!rating) return null;
+            return (
+              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full" title="Calificación">
+                <span className="text-lg leading-none">{rating.emoji}</span>
+                <span className="text-xs font-medium text-gray-700">{rating.label}</span>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
