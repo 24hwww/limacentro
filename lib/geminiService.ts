@@ -4,15 +4,13 @@ let aiClient: GoogleGenAI | null = null;
 
 // Initialize client safely, checking if process is defined in the environment
 try {
-  // @ts-ignore
-  if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
-    // @ts-ignore
+  if (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) {
     aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  } else {
-    console.warn("Gemini API Key not found in environment variables.");
   }
 } catch (error) {
-  console.warn("Error accessing process.env", error);
+  if (!(error instanceof ReferenceError)) {
+    console.warn("Error initializing Gemini AI:", error);
+  }
 }
 
 export const generateBusinessDescription = async (
