@@ -13,7 +13,7 @@ async function main() {
     console.log(`Seeding admin user: ${adminEmail}`);
 
     // Note: stackId will be set when admin first signs in with Stack Auth
-    const admin = await prisma.User.upsert({
+    const admin = await prisma.user.upsert({
         where: { email: adminEmail },
         update: { role: 'ADMIN' },
         create: {

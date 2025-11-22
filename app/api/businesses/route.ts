@@ -15,7 +15,7 @@ export async function GET(request: Request) {
         // Get user from database to check role
         let dbUser = null;
         if (stackUser) {
-            dbUser = await prisma.User.findUnique({
+            dbUser = await prisma.user.findUnique({
                 where: { stackId: stackUser.id },
             });
         }
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
             whereClause = { ownerId: dbUser.id };
         }
 
-        const businesses = await prisma.Business.findMany({
+        const businesses = await prisma.business.findMany({
             where: whereClause,
             orderBy: { createdAt: 'desc' },
         });
@@ -48,26 +48,46 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Sync user to database
-        const dbUser = await prisma.User.upsert({
-            where: { stackId: stackUser.id },
-            update: {
-                email: stackUser.primaryEmail || '',
-                name: stackUser.displayName,
-                image: stackUser.profileImageUrl,
-            },
-            create: {
-                stackId: stackUser.id,
-                email: stackUser.primaryEmail || '',
-                name: stackUser.displayName,
-                image: stackUser.profileImageUrl,
-            },
-        });
+        // Sync user to database (prefer email to preserve pre-seeded role)
+        const primaryEmail = stackUser.primaryEmail || '';
+
+        // If there's a user with this email, update its stackId and profile, preserving role
+        const existingByEmail = primaryEmail
+            ? await prisma.user.findUnique({ where: { email: primaryEmail } })
+            : null;
+
+        let dbUser = null as any;
+        if (existingByEmail) {
+            dbUser = await prisma.user.update({
+                where: { email: primaryEmail },
+                data: {
+                    stackId: stackUser.id,
+                    name: stackUser.displayName,
+                    image: stackUser.profileImageUrl,
+                },
+            });
+        } else {
+            // Fallback: upsert by stackId
+            dbUser = await prisma.user.upsert({
+                where: { stackId: stackUser.id },
+                update: {
+                    email: primaryEmail,
+                    name: stackUser.displayName,
+                    image: stackUser.profileImageUrl,
+                },
+                create: {
+                    stackId: stackUser.id,
+                    email: primaryEmail,
+                    name: stackUser.displayName,
+                    image: stackUser.profileImageUrl,
+                },
+            });
+        }
 
         const body = await request.json();
         const { name, category, district, address, description, phone, website, rating, lat, lng, imageUrl } = body;
 
-        const newBusiness = await prisma.Business.create({
+        const newBusiness = await prisma.business.create({
             data: {
                 name,
                 category,
