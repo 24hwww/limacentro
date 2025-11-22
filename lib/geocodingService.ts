@@ -19,7 +19,8 @@ export const geocodeAddress = async (address: string, district: string): Promise
     
     const response = await fetch(url, {
       headers: {
-        'Accept-Language': 'es', // Prefer Spanish results
+        'Accept-Language': 'es',
+        'User-Agent': 'LimaCentro/1.0'
       }
     });
 
