@@ -9,7 +9,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const dbUser = await prisma.User.findUnique({
+        const dbUser = await prisma.user.findUnique({
             where: { stackId: stackUser.id },
         });
 
