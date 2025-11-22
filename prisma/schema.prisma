@@ -53,7 +53,7 @@ model Business {
   updatedAt   DateTime @updatedAt
 }
 
-model activeUser {
+model ActiveUser {
   id        String   @id
   lastPing  DateTime @default(now())
 }
