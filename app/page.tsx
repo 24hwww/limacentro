@@ -10,6 +10,7 @@ import { BusinessCard } from '../components/BusinessCard';
 import { BusinessForm } from '../components/BusinessForm';
 import { BusinessDetailView } from '../components/BusinessDetailView';
 import { Footer } from '../components/Footer';
+import { OnlineUsersCounter } from '../components/OnlineUsersCounter';
 import { Search, Map as MapIcon, Plus, LogOut, Menu, SlidersHorizontal, X } from 'lucide-react';
 
 // Dynamically import the Map component with SSR disabled
@@ -353,6 +354,8 @@ function HomeContent() {
                     onClose={() => setActiveBusinessId(null)}
                 />
             )}
+
+            <OnlineUsersCounter />
 
         </div>
     );
