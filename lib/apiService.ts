@@ -1,8 +1,12 @@
 import { Business } from '../types';
 
 export const apiService = {
-    async getBusinesses(): Promise<Business[]> {
-        const response = await fetch('/api/businesses');
+    async getBusinesses(admin: boolean = false, myBusiness: boolean = false): Promise<Business[]> {
+        const params = new URLSearchParams();
+        if (admin) params.append('admin', 'true');
+        if (myBusiness) params.append('my_business', 'true');
+
+        const response = await fetch(`/api/businesses?${params.toString()}`);
         if (!response.ok) {
             throw new Error('Failed to fetch businesses');
         }

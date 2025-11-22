@@ -4,6 +4,7 @@ import './globals.css';
 import 'leaflet/dist/leaflet.css';
 import SessionProvider from '../components/SessionProvider';
 import Script from 'next/script';
+import { OnlineUsersCounter } from '../components/OnlineUsersCounter';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -40,7 +41,10 @@ export default function RootLayout({
                         gtag('config', 'G-YTBE1TCWQR');
                     `}
                 </Script>
-                <SessionProvider>{children}</SessionProvider>
+                <SessionProvider>
+                    {children}
+                    <OnlineUsersCounter />
+                </SessionProvider>
             </body>
         </html>
     );
