@@ -15,6 +15,9 @@ export interface Business {
   lng: number;
   imageUrl?: string;
   ownerId?: string;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface User {

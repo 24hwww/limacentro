@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { emailService } from '@/lib/emailService';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const business = await prisma.business.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!business) {
@@ -18,13 +20,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const body = await request.json();
-        const { name, category, district, address, description, phone, website, rating, lat, lng, imageUrl } = body;
+        const { name, category, district, address, description, phone, website, rating, lat, lng, imageUrl, status } = body;
 
         const updatedBusiness = await prisma.business.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 name,
                 category,
@@ -37,8 +40,17 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                 lat,
                 lng,
                 imageUrl,
+                status, // Allow updating status
             },
         });
+
+        // Notify User if approved
+        if (updatedBusiness.status === 'APPROVED' && updatedBusiness.ownerId) {
+            const owner = await prisma.user.findUnique({ where: { id: updatedBusiness.ownerId } });
+            if (owner?.email) {
+                await emailService.notifyUserBusinessApproved(owner.email, updatedBusiness.name);
+            }
+        }
 
         return NextResponse.json(updatedBusiness);
     } catch (error) {
@@ -47,10 +59,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         await prisma.business.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return NextResponse.json({ message: 'Business deleted successfully' });

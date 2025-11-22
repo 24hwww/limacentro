@@ -35,7 +35,7 @@ export default function Home() {
     const [businesses, setBusinesses] = useState<Business[]>([]);
 
     // View State
-    const [viewState, setViewState] = useState<ViewState>('LIST');
+    const [viewState, setViewState] = useState<ViewState | 'MY_BUSINESSES'>('LIST');
     const [showSidebarMobile, setShowSidebarMobile] = useState(true);
 
     // Filter State
@@ -99,11 +99,17 @@ export default function Home() {
             // Remove ID as backend generates it
             const { id, ...businessData } = newBusiness;
             const savedBusiness = await apiService.createBusiness(businessData);
-            setBusinesses(prev => [savedBusiness, ...prev]);
+
+            // Check if it's pending (it should be for non-admins)
+            if (savedBusiness.status === 'PENDING') {
+                alert("Tu negocio ha sido registrado y está pendiente de aprobación por el administrador.");
+            } else {
+                setBusinesses(prev => [savedBusiness, ...prev]);
+                // Focus on new business
+                setMapCenter({ lat: savedBusiness.lat, lng: savedBusiness.lng });
+                setActiveBusinessId(savedBusiness.id);
+            }
             setViewState('LIST');
-            // Focus on new business
-            setMapCenter({ lat: savedBusiness.lat, lng: savedBusiness.lng });
-            setActiveBusinessId(savedBusiness.id);
         } catch (error) {
             console.error("Failed to save business", error);
             alert("Error al guardar el negocio");
@@ -181,6 +187,28 @@ export default function Home() {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* My Businesses Button */}
+                                {user && (
+                                    <div className="px-4 pb-2 flex justify-end">
+                                        <button
+                                            onClick={() => {
+                                                if (viewState === 'MY_BUSINESSES') {
+                                                    setViewState('LIST');
+                                                    // Reload all businesses
+                                                    apiService.getBusinesses().then(setBusinesses);
+                                                } else {
+                                                    setViewState('MY_BUSINESSES');
+                                                    // Load my businesses
+                                                    apiService.getBusinesses(false, true).then(setBusinesses);
+                                                }
+                                            }}
+                                            className="text-xs font-medium text-blue-600 hover:underline"
+                                        >
+                                            {viewState === 'MY_BUSINESSES' ? 'Ver todos los negocios' : 'Mis Negocios'}
+                                        </button>
+                                    </div>
+                                )}
 
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
@@ -270,8 +298,8 @@ export default function Home() {
                                     </div>
                                 ) : (
                                     <div>
-                                        <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 z-10">
-                                            {filteredBusinesses.length} Resultados en Lima
+                                        <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 z-10 flex justify-between">
+                                            <span>{filteredBusinesses.length} Resultados {viewState === 'MY_BUSINESSES' ? '(Mis Negocios)' : 'en Lima'}</span>
                                         </div>
                                         {filteredBusinesses.map(b => (
                                             <BusinessCard
