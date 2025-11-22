@@ -20,56 +20,15 @@ enum BusinessStatus {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  stackId       String    @unique // Stack Auth user ID
   email         String    @unique
-  emailVerified DateTime?
+  name          String?
   image         String?
   role          Role      @default(USER)
-  accounts      Account[]
-  sessions      Session[]
   businesses    Business[]
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
- 
-  @@id([identifier, token])
 }
 
 model Business {
@@ -94,7 +53,7 @@ model Business {
   updatedAt   DateTime @updatedAt
 }
 
-model ActiveUser {
+model activeUser {
   id        String   @id
   lastPing  DateTime @default(now())
 }

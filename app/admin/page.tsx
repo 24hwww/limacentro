@@ -1,37 +1,50 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@stackframe/stack';
 import { useRouter } from 'next/navigation';
 import { Business } from '../../types';
 import { apiService } from '../../lib/apiService';
 import { Check, X, Loader2 } from 'lucide-react';
 
 export default function AdminDashboard() {
-    const { data: session, status } = useSession();
+    const stackUser = useUser();
     const router = useRouter();
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (status === 'loading') return;
+        const checkAuth = async () => {
+            if (!stackUser) {
+                router.push('/');
+                return;
+            }
 
-        // @ts-ignore
-        if (!session || session.user?.role !== 'ADMIN') {
-            router.push('/');
-            return;
-        }
+            try {
+                const response = await fetch('/api/user/me');
+                if (response.ok) {
+                    const user = await response.json();
+                    if (user.role !== 'ADMIN') {
+                        router.push('/');
+                        return;
+                    }
+                    loadBusinesses();
+                } else {
+                    router.push('/');
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+                router.push('/');
+            }
+        };
 
-        loadBusinesses();
-    }, [session, status, router]);
+        checkAuth();
+    }, [stackUser, router]);
 
     const loadBusinesses = async () => {
         try {
             setLoading(true);
-            // Fetch all businesses (admin=true)
             const data = await apiService.getBusinesses(true);
-            // Filter for pending ones locally or update API to support status filter
-            // For now, let's filter client-side as the list shouldn't be massive yet
             setBusinesses(data.filter(b => b.status === 'PENDING'));
         } catch (error) {
             console.error("Failed to load businesses", error);
@@ -43,7 +56,6 @@ export default function AdminDashboard() {
     const handleStatusChange = async (id: string, newStatus: 'APPROVED' | 'REJECTED') => {
         try {
             await apiService.updateBusiness(id, { status: newStatus });
-            // Remove from list
             setBusinesses(prev => prev.filter(b => b.id !== id));
         } catch (error) {
             console.error("Failed to update status", error);
@@ -51,7 +63,7 @@ export default function AdminDashboard() {
         }
     };
 
-    if (status === 'loading' || loading) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-gray-50">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -77,7 +89,6 @@ export default function AdminDashboard() {
                         <div className="divide-y divide-gray-100">
                             {businesses.map((business) => (
                                 <div key={business.id} className="p-6 flex flex-col md:flex-row gap-6 hover:bg-gray-50 transition-colors">
-                                    {/* Image */}
                                     <div className="w-full md:w-48 h-32 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                                         <img
                                             src={business.imageUrl || "https://picsum.photos/200"}
@@ -86,7 +97,6 @@ export default function AdminDashboard() {
                                         />
                                     </div>
 
-                                    {/* Content */}
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
@@ -108,7 +118,6 @@ export default function AdminDashboard() {
                                             {business.phone && <span>📞 {business.phone}</span>}
                                         </div>
 
-                                        {/* Actions */}
                                         <div className="flex gap-3">
                                             <button
                                                 onClick={() => handleStatusChange(business.id, 'APPROVED')}

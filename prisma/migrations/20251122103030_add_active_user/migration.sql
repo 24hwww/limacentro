@@ -1,7 +1,7 @@
 -- CreateTable
-CREATE TABLE "ActiveUser" (
+CREATE TABLE "activeUser" (
     "id" TEXT NOT NULL,
     "lastPing" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "ActiveUser_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "activeUser_pkey" PRIMARY KEY ("id")
 );

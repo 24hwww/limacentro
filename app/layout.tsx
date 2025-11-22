@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import 'leaflet/dist/leaflet.css';
-import SessionProvider from '../components/SessionProvider';
+import StackAuthProvider from '../components/StackAuthProvider';
 import Script from 'next/script';
 import { OnlineUsersCounter } from '../components/OnlineUsersCounter';
 
@@ -41,10 +41,10 @@ export default function RootLayout({
                         gtag('config', 'G-YTBE1TCWQR');
                     `}
                 </Script>
-                <SessionProvider>
+                <StackAuthProvider>
                     {children}
                     <OnlineUsersCounter />
-                </SessionProvider>
+                </StackAuthProvider>
             </body>
         </html>
     );
