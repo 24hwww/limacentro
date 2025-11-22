@@ -1,29 +1,36 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { auth } from '@/auth';
+import { getStackUser } from '@/lib/stackAuth';
 import { emailService } from '@/lib/emailService';
 
 export async function GET(request: Request) {
     try {
-        const session = await auth();
+        const stackUser = await getStackUser(request);
         const { searchParams } = new URL(request.url);
         const showAll = searchParams.get('admin') === 'true';
         const myBusiness = searchParams.get('my_business') === 'true';
 
         let whereClause: any = { status: 'APPROVED' };
 
+        // Get user from database to check role
+        let dbUser = null;
+        if (stackUser) {
+            dbUser = await prisma.User.findUnique({
+                where: { stackId: stackUser.id },
+            });
+        }
+
         // Admin can see all
-        // @ts-ignore
-        if (showAll && session?.user?.role === 'ADMIN') {
+        if (showAll && dbUser?.role === 'ADMIN') {
             whereClause = {};
         }
 
         // User can see their own
-        if (myBusiness && session?.user?.id) {
-            whereClause = { ownerId: session.user.id };
+        if (myBusiness && dbUser?.id) {
+            whereClause = { ownerId: dbUser.id };
         }
 
-        const businesses = await prisma.business.findMany({
+        const businesses = await prisma.Business.findMany({
             where: whereClause,
             orderBy: { createdAt: 'desc' },
         });
@@ -36,15 +43,31 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) {
+        const stackUser = await getStackUser(request);
+        if (!stackUser) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        // Sync user to database
+        const dbUser = await prisma.User.upsert({
+            where: { stackId: stackUser.id },
+            update: {
+                email: stackUser.primaryEmail || '',
+                name: stackUser.displayName,
+                image: stackUser.profileImageUrl,
+            },
+            create: {
+                stackId: stackUser.id,
+                email: stackUser.primaryEmail || '',
+                name: stackUser.displayName,
+                image: stackUser.profileImageUrl,
+            },
+        });
 
         const body = await request.json();
         const { name, category, district, address, description, phone, website, rating, lat, lng, imageUrl } = body;
 
-        const newBusiness = await prisma.business.create({
+        const newBusiness = await prisma.Business.create({
             data: {
                 name,
                 category,
@@ -57,7 +80,7 @@ export async function POST(request: Request) {
                 lat,
                 lng,
                 imageUrl,
-                ownerId: session.user.id,
+                ownerId: dbUser.id,
                 status: 'PENDING', // Default status
             },
         });

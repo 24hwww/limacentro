@@ -6,7 +6,7 @@ export async function GET() {
         // Delete users inactive for > 60 seconds
         const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
 
-        await prisma.activeUser.deleteMany({
+        await prisma.ActiveUser.deleteMany({
             where: {
                 lastPing: {
                     lt: oneMinuteAgo,
@@ -14,7 +14,7 @@ export async function GET() {
             },
         });
 
-        const count = await prisma.activeUser.count();
+        const count = await prisma.ActiveUser.count();
 
         return NextResponse.json({ count });
     } catch (error) {

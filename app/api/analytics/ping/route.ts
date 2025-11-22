@@ -9,7 +9,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
         }
 
-        await prisma.activeUser.upsert({
+        await prisma.ActiveUser.upsert({
             where: { id },
             update: { lastPing: new Date() },
             create: { id, lastPing: new Date() },
