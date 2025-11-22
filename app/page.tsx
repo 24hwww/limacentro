@@ -11,7 +11,7 @@ import { BusinessForm } from '../components/BusinessForm';
 import { BusinessDetailView } from '../components/BusinessDetailView';
 import { Footer } from '../components/Footer';
 import GoogleSignInButton from '../components/GoogleSignInButton';
-import { Search, Map as MapIcon, Plus, LogOut, Menu } from 'lucide-react';
+import { Search, Map as MapIcon, Plus, LogOut, Menu, SlidersHorizontal, X } from 'lucide-react';
 
 // Dynamically import the Map component with SSR disabled
 const MapComponent = dynamic(() => import('../components/MapComponent'), {
@@ -39,6 +39,7 @@ export default function Home() {
     const [showSidebarMobile, setShowSidebarMobile] = useState(true);
 
     // Filter State
+    const [showFilters, setShowFilters] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState<string>('');
     const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -131,19 +132,6 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                         <h1 className="text-xl font-bold tracking-tight text-gray-900">LIMACENTRO</h1>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        {user ? (
-                            <div className="flex items-center gap-2">
-                                <img src={user.image || ''} alt={user.name || 'User'} className="w-8 h-8 rounded-full border border-gray-200" />
-                                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600" title="Cerrar sesión">
-                                    <LogOut className="w-5 h-5" />
-                                </button>
-                            </div>
-                        ) : (
-                            <GoogleSignInButton />
-                        )}
-                    </div>
                 </div>
 
                 {/* CONTENT SWITCHER */}
@@ -158,41 +146,92 @@ export default function Home() {
                     ) : (
 
                         /* VIEW: LIST / DETAILS */
-                        <div className="h-full flex flex-col">
+                        <div className="h-full flex flex-col relative">
 
                             {/* SEARCH & FILTER BAR */}
                             <div className="p-4 space-y-3 bg-white border-b border-gray-100 flex-shrink-0">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar restaurantes, servicios..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-                                    />
+                                {/* User / Login Section */}
+                                <div className="flex justify-end mb-2">
+                                    {user ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                                            <img src={user.image || ''} alt={user.name || 'User'} className="w-8 h-8 rounded-full border border-gray-200" />
+                                            <button onClick={handleLogout} className="text-gray-400 hover:text-red-600" title="Cerrar sesión">
+                                                <LogOut className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full">
+                                            <GoogleSignInButton />
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-                                    <select
-                                        value={selectedDistrict}
-                                        onChange={(e) => setSelectedDistrict(e.target.value)}
-                                        className="text-xs border border-gray-300 rounded px-2 py-1.5 bg-white min-w-[100px]"
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => setShowFilters(!showFilters)}
+                                        className={`p-2 rounded-lg border ${showFilters || selectedDistrict || selectedCategory ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-600'}`}
                                     >
-                                        <option value="">Todos los distritos</option>
-                                        {LIMA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                                    </select>
-
-                                    <select
-                                        value={selectedCategory}
-                                        onChange={(e) => setSelectedCategory(e.target.value)}
-                                        className="text-xs border border-gray-300 rounded px-2 py-1.5 bg-white min-w-[100px]"
-                                    >
-                                        <option value="">Todas las categorías</option>
-                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
+                                        <SlidersHorizontal className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </div>
+
+                            {/* FILTER SIDEBAR */}
+                            {showFilters && (
+                                <div className="absolute inset-0 z-20 bg-white flex flex-col animate-in slide-in-from-left duration-300">
+                                    <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                                        <h2 className="font-bold text-lg text-gray-900">Filtros</h2>
+                                        <button onClick={() => setShowFilters(false)} className="text-gray-500 hover:text-gray-700">
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+                                    <div className="p-4 space-y-6 overflow-y-auto">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Distrito</label>
+                                            <select
+                                                value={selectedDistrict}
+                                                onChange={(e) => setSelectedDistrict(e.target.value)}
+                                                className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                                            >
+                                                <option value="">Todos los distritos</option>
+                                                {LIMA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                                            <select
+                                                value={selectedCategory}
+                                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                                className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                                            >
+                                                <option value="">Todas las categorías</option>
+                                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                            </select>
+                                        </div>
+
+                                        {(selectedDistrict || selectedCategory) && (
+                                            <button
+                                                onClick={() => { setSelectedDistrict(''); setSelectedCategory(''); }}
+                                                className="text-sm text-red-500 hover:underline w-full text-left"
+                                            >
+                                                Limpiar filtros
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* ACTION BAR (Add Business) */}
                             {user && (
