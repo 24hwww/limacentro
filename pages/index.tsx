@@ -14,7 +14,7 @@ const MapBoard = dynamic(() => import('../components/MapBoard'), {
   loading: () => <div className="w-full h-full bg-[#262626] flex items-center justify-center text-gray-500">Cargando mapa de Lima...</div>
 });
 
-const HomePage: React.FC = () => {
+export default function HomePage() {
   // Global State
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [user, setUser] = useState<User | null>(null);
@@ -244,4 +244,3 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage;

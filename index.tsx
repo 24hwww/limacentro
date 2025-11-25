@@ -1,1 +1,0 @@
-// Deprecated: Project migrated to Next.js. See pages/index.tsx

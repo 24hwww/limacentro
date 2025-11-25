@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LIMA_DISTRICTS, CATEGORIES } from '../constants';
 import { geocodeAddress } from '../services/geocodingService';
-import { generateBusinessDescription } from '../services/geminiService';
 import { Business } from '../types';
 import { Loader2, Wand2, MapPin, Save, X } from 'lucide-react';
 
@@ -12,7 +11,6 @@ interface BusinessFormProps {
 
 export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) => {
   const [loadingGeo, setLoadingGeo] = useState(false);
-  const [loadingAI, setLoadingAI] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<Business>>({
@@ -56,27 +54,6 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
       setError("Error al conectar con el servicio de mapas.");
     } finally {
       setLoadingGeo(false);
-    }
-  };
-
-  const handleAIGenerate = async () => {
-    if (!formData.name || !formData.category) {
-      setError("Ingresa el nombre y categoría para generar una descripción.");
-      return;
-    }
-    setLoadingAI(true);
-    try {
-      const desc = await generateBusinessDescription(
-        formData.name,
-        formData.category,
-        formData.district || '',
-        formData.description || '' // Pass existing description as keywords
-      );
-      setFormData(prev => ({ ...prev, description: desc }));
-    } catch (err) {
-      setError("Error generando la descripción con AI.");
-    } finally {
-      setLoadingAI(false);
     }
   };
 
@@ -201,20 +178,8 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
           </div>
         </div>
 
-        {/* AI Description Section */}
         <div>
-          <div className="flex justify-between mb-2 items-center">
-            <label htmlFor="description" className="block text-base font-semibold text-gray-900">Descripción *</label>
-            <button
-              type="button"
-              onClick={handleAIGenerate}
-              disabled={loadingAI}
-              className="text-sm text-purple-700 hover:text-purple-900 flex items-center font-bold focus:outline-none focus:underline"
-            >
-              {loadingAI ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Wand2 className="w-4 h-4 mr-1.5" />}
-              Generar con AI
-            </button>
-          </div>
+          <label htmlFor="description" className="block text-base font-semibold text-gray-900 mb-2">Descripción *</label>
           <textarea
             id="description"
             name="description"
