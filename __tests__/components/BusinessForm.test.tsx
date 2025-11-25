@@ -74,7 +74,7 @@ describe('BusinessForm Component', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Debes validar la ubicación/i)).toBeInTheDocument();
+      expect(screen.getByText(/Debes validar la ubicación en el mapa/i)).toBeInTheDocument();
     });
 
     expect(mockOnSave).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe('BusinessForm Component', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Debes validar la ubicación/i)).toBeInTheDocument();
+      expect(screen.getByText(/Debes validar la ubicación en el mapa/i)).toBeInTheDocument();
     });
   });
 });
