@@ -7,6 +7,7 @@ import { BusinessCard } from '../components/BusinessCard';
 import { BusinessForm } from '../components/BusinessForm';
 import { BusinessDetailView } from '../components/BusinessDetailView';
 import { Search, Map as MapIcon, Plus, User as UserIcon, LogOut, Menu } from 'lucide-react';
+import OnlineUsers from '../components/OnlineUsers';
 
 // Importación Dinámica del Mapa (Crucial para Next.js + Leaflet)
 const MapBoard = dynamic(() => import('../components/MapBoard'), { 
@@ -66,7 +67,7 @@ export default function HomePage() {
 
   const handleBusinessClick = (b: Business) => {
     setMapCenter({ lat: b.lat, lng: b.lng });
-    setActiveBusinessId(b.id);
+    setActiveBusinessId(String(b.id));
     setViewState('DETAILS');
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
         setShowSidebarMobile(false); 
@@ -82,7 +83,7 @@ export default function HomePage() {
     setBusinesses(updated);
     setViewState('LIST');
     setMapCenter({ lat: newBusiness.lat, lng: newBusiness.lng });
-    setActiveBusinessId(newBusiness.id);
+    setActiveBusinessId(String(newBusiness.id));
   };
 
   const toggleSidebar = () => setShowSidebarMobile(!showSidebarMobile);
@@ -121,7 +122,10 @@ export default function HomePage() {
         <div className="p-5 bg-white border-b border-gray-200 flex justify-between items-center shadow-sm flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="bg-red-700 text-white p-2 rounded-md font-extrabold tracking-tighter text-xl">LC</div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">LIMACENTRO</h1>
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">LIMACENTRO</h1>
+              <OnlineUsers />
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
