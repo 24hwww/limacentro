@@ -11,21 +11,6 @@ const GoogleAnalytics = () => {
     // Don't run if there's no GA ID
     if (!GA_TRACKING_ID) return;
 
-    // --- Ping functionality ---
-    const sendPing = () => {
-      // Send to Google Analytics if gtag is available
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'user_ping', { alive: true });
-      }
-      // Send to our backend API
-      // Use keepalive to ensure the request is sent even if the user navigates away
-      navigator.sendBeacon('/api/ping');
-    };
-
-    // Send a ping immediately on load and then every 20 seconds
-    sendPing();
-    const interval = setInterval(sendPing, 20000);
-
     // --- Page change tracking ---
     const handleRouteChange = (url: string) => {
       if (typeof window.gtag === 'function') {
@@ -39,7 +24,6 @@ const GoogleAnalytics = () => {
 
     // --- Cleanup ---
     return () => {
-      clearInterval(interval);
       router.events.off('routeChangeComplete', handleRouteChange);
     };
   }, [router.events]);
