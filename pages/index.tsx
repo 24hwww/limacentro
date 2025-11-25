@@ -7,7 +7,6 @@ import { BusinessCard } from '../components/BusinessCard';
 import { BusinessForm } from '../components/BusinessForm';
 import { BusinessDetailView } from '../components/BusinessDetailView';
 import { Search, Map as MapIcon, Plus, LogOut, Menu } from 'lucide-react';
-import OnlineUsers from '../components/OnlineUsers';
 import GoogleSignInButton from '../components/GoogleSignInButton'; // Import the new component
 
 // Dynamic Map Import
@@ -111,8 +110,7 @@ export default function HomePage() {
             <div className="bg-red-700 text-white p-2 rounded-md font-extrabold tracking-tighter text-xl">LC</div>
             <div className="flex flex-col">
               <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">LIMACENTRO</h1>
-              <OnlineUsers />
-            </div>
+                          </div>
           </div>
           <div className="mt-4">
             {user ? (

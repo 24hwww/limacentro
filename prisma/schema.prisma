@@ -6,6 +6,11 @@ datasource db {
   provider = "postgresql"
 }
 
+model ActiveUser {
+  id        String   @id @default(cuid())
+  lastPing  DateTime @default(now())
+}
+
 model User {
   id           Int        @id @default(autoincrement())
   email        String     @unique
