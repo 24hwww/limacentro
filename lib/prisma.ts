@@ -5,14 +5,15 @@ import { PrismaClient } from '@prisma/client';
 //
 // Learn more: https://pris.ly/d/help/next-js-best-practices
 
-declare const global: {
-  prisma: PrismaClient | undefined;
-};
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
-const prisma = global.prisma || new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-});
+const prisma = global.prisma || new PrismaClient();
 
-if (process.env.NODE_ENV === 'development') global.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
 
 export default prisma;

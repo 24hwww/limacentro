@@ -96,7 +96,7 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form noValidate onSubmit={handleSubmit} className="space-y-5">
         {/* Basic Info */}
         <div className="grid grid-cols-1 gap-5">
           <div>
