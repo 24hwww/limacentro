@@ -5,6 +5,17 @@ import {
   verifyToken,
 } from '@/services/auth';
 
+// Mock the database service to prevent Prisma initialization during tests
+jest.mock('@/services/db', () => ({
+  db: {
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+  },
+}));
+
 describe('Auth Service', () => {
   describe('Password Hashing', () => {
     it('should hash a password', async () => {
