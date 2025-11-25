@@ -15,6 +15,14 @@ export const LIMA_DISTRICTS = [
   "Surquillo", "Villa El Salvador", "Villa María del Triunfo"
 ];
 
+export const RATING_OPTIONS = [
+  { value: 1, emoji: '😞', label: 'Malo' },
+  { value: 2, emoji: '😐', label: 'Regular' },
+  { value: 3, emoji: '🙂', label: 'Bueno' },
+  { value: 4, emoji: '😊', label: 'Muy Bueno' },
+  { value: 5, emoji: '🤩', label: 'Excelente' },
+];
+
 export const CATEGORIES = [
   "Restaurante", "Hotel", "Tienda", "Servicios", "Salud", "Educación", "Tecnología", "Turismo", "Otros"
 ];

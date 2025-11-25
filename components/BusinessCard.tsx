@@ -1,6 +1,7 @@
 import React from 'react';
 import { Business } from '../types';
-import { MapPin, Phone, Globe, Star } from 'lucide-react';
+import { MapPin, Phone, Globe } from 'lucide-react';
+import { RATING_OPTIONS } from '../constants';
 
 interface BusinessCardProps {
   business: Business;
@@ -36,9 +37,18 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick, i
             </span>
             <h3 className="text-lg font-bold text-gray-900 truncate mt-0.5">{business.name}</h3>
           </div>
-          <div className="flex items-center bg-yellow-100 px-2 py-1 rounded border border-yellow-200" aria-label={`Calificación: ${business.rating} estrellas`}>
-            <Star className="w-4 h-4 text-yellow-700 fill-yellow-700 mr-1" />
-            <span className="text-sm font-bold text-yellow-900">{business.rating}</span>
+          <div>
+            {(() => {
+              const roundedRating = Math.round(business.rating);
+              const rating = RATING_OPTIONS.find(r => r.value === roundedRating);
+              if (!rating) return null;
+              return (
+                <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full" title={`Calificación: ${rating.label}`}>
+                  <span className="text-lg leading-none">{rating.emoji}</span>
+                  <span className="text-xs font-medium text-gray-700">{rating.label}</span>
+                </div>
+              );
+            })()}
           </div>
         </div>
 

@@ -3,6 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/api/ping": "pages/api/ping.js",
-  "/api/online-users": "pages/api/online-users.js"
+  "/api/online-users": "pages/api/online-users.js",
+  "/api/ping": "pages/api/ping.js"
 }
