@@ -1,5 +1,5 @@
 export interface Business {
-  id: string;
+  id: string | number;
   name: string;
   category: string;
   district: string;
@@ -11,7 +11,7 @@ export interface Business {
   lat: number;
   lng: number;
   imageUrl?: string;
-  ownerId?: string;
+  ownerId?: string | number;
 }
 
 export interface User {

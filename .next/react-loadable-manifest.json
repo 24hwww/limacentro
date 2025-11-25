@@ -1,22 +1,20 @@
 {
-  "app\\page.tsx -> ../components/MapComponent": {
-    "id": "app\\page.tsx -> ../components/MapComponent",
+  "node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": "node_modules\\next\\dist\\client\\index.js -> ../pages/_app",
     "files": [
-      "static/chunks/_app-pages-browser_components_MapComponent_tsx.js"
+      "static/chunks/_pages-dir-browser_node_modules_next_dist_pages__app_js.js"
     ]
   },
-  "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @simplewebauthn/browser": {
-    "id": "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @simplewebauthn/browser",
-    "files": []
-  },
-  "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @stackframe/stack-shared/dist/utils/errors": {
-    "id": "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @stackframe/stack-shared/dist/utils/errors",
-    "files": []
-  },
-  "node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts": {
-    "id": "node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts",
+  "node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": "node_modules\\next\\dist\\client\\index.js -> ../pages/_error",
     "files": [
-      "static/chunks/_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js"
+      "static/chunks/_pages-dir-browser_node_modules_next_dist_pages__error_js.js"
+    ]
+  },
+  "pages\\index.tsx -> ../components/MapBoard": {
+    "id": "pages\\index.tsx -> ../components/MapBoard",
+    "files": [
+      "static/chunks/_pages-dir-browser_components_MapBoard_tsx.js"
     ]
   }
 }
