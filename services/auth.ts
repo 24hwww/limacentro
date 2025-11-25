@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { queryOne, queryMany } from './db';
+import { db } from './db';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const JWT_EXPIRY = '7d';
@@ -9,7 +9,7 @@ export interface AuthUser {
   id: number;
   email: string;
   name: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
 
 export interface AuthToken {
@@ -70,10 +70,9 @@ export async function registerUser(
 ): Promise<AuthToken> {
   try {
     // Check if user already exists
-    const existingUser = await queryOne(
-      'SELECT id FROM users WHERE email = $1',
-      [email]
-    );
+    const existingUser = await db.user.findUnique({
+      where: { email },
+    });
 
     if (existingUser) {
       throw new Error('User already exists');
@@ -83,12 +82,21 @@ export async function registerUser(
     const passwordHash = await hashPassword(password);
 
     // Create user
-    const user = await queryOne(
-      `INSERT INTO users (email, password_hash, name, avatar_url)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, email, name, avatar_url as "avatarUrl"`,
-      [email, passwordHash, name, `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`]
-    );
+    const newUser = await db.user.create({
+      data: {
+        email,
+        passwordHash,
+        name,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+      },
+    });
+
+    const user: AuthUser = {
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+      avatarUrl: newUser.avatarUrl,
+    };
 
     // Generate token
     const token = generateToken(user);
@@ -106,24 +114,27 @@ export async function registerUser(
 export async function loginUser(email: string, password: string): Promise<AuthToken> {
   try {
     // Find user
-    const user = await queryOne(
-      'SELECT id, email, name, avatar_url as "avatarUrl", password_hash FROM users WHERE email = $1',
-      [email]
-    );
+    const userRecord = await db.user.findUnique({
+      where: { email },
+    });
 
-    if (!user) {
+    if (!userRecord) {
       throw new Error('Invalid email or password');
     }
 
     // Compare password
-    const isPasswordValid = await comparePassword(password, user.password_hash);
+    const isPasswordValid = await comparePassword(password, userRecord.passwordHash);
 
     if (!isPasswordValid) {
       throw new Error('Invalid email or password');
     }
 
-    // Remove password hash from user object
-    delete user.password_hash;
+    const user: AuthUser = {
+      id: userRecord.id,
+      email: userRecord.email,
+      name: userRecord.name,
+      avatarUrl: userRecord.avatarUrl,
+    };
 
     // Generate token
     const token = generateToken(user);
@@ -140,11 +151,18 @@ export async function loginUser(email: string, password: string): Promise<AuthTo
  */
 export async function getUserById(userId: number): Promise<AuthUser | null> {
   try {
-    const user = await queryOne(
-      'SELECT id, email, name, avatar_url as "avatarUrl" FROM users WHERE id = $1',
-      [userId]
-    );
-    return user || null;
+    const userRecord = await db.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userRecord) return null;
+
+    return {
+      id: userRecord.id,
+      email: userRecord.email,
+      name: userRecord.name,
+      avatarUrl: userRecord.avatarUrl,
+    };
   } catch (error) {
     console.error('Get user error:', error);
     return null;
@@ -156,11 +174,18 @@ export async function getUserById(userId: number): Promise<AuthUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<AuthUser | null> {
   try {
-    const user = await queryOne(
-      'SELECT id, email, name, avatar_url as "avatarUrl" FROM users WHERE email = $1',
-      [email]
-    );
-    return user || null;
+    const userRecord = await db.user.findUnique({
+      where: { email },
+    });
+
+    if (!userRecord) return null;
+
+    return {
+      id: userRecord.id,
+      email: userRecord.email,
+      name: userRecord.name,
+      avatarUrl: userRecord.avatarUrl,
+    };
   } catch (error) {
     console.error('Get user error:', error);
     return null;
@@ -175,17 +200,20 @@ export async function updateUserProfile(
   updates: Partial<{ name: string; avatarUrl: string }>
 ): Promise<AuthUser> {
   try {
-    const user = await queryOne(
-      `UPDATE users 
-       SET name = COALESCE($2, name), 
-           avatar_url = COALESCE($3, avatar_url),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $1
-       RETURNING id, email, name, avatar_url as "avatarUrl"`,
-      [userId, updates.name || null, updates.avatarUrl || null]
-    );
+    const updatedUser = await db.user.update({
+      where: { id: userId },
+      data: {
+        name: updates.name,
+        avatarUrl: updates.avatarUrl,
+      },
+    });
 
-    return user;
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      avatarUrl: updatedUser.avatarUrl,
+    };
   } catch (error) {
     console.error('Update user error:', error);
     throw error;

@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  name         String
+  avatarUrl    String?    @map("avatar_url")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at")
+  businesses   Business[]
+
+  @@map("users")
+}
+
+model Business {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  category    String
+  district    String
+  address     String
+  description String?  @db.Text
+  phone       String?  @db.VarChar(20)
+  website     String?
+  rating      Decimal? @default(5.0) @db.Decimal(3, 2)
+  lat         Decimal  @db.Decimal(10, 8)
+  lng         Decimal  @db.Decimal(11, 8)
+  imageUrl    String?  @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("businesses")
+  @@index([userId], map: "idx_businesses_user_id")
+  @@index([district], map: "idx_businesses_district")
+  @@index([category], map: "idx_businesses_category")
+}
