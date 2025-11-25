@@ -12,10 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Next.js
-.next/
-out/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -26,4 +22,3 @@ out/
 *.njsproj
 *.sln
 *.sw?
-.env

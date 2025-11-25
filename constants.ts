@@ -19,14 +19,6 @@ export const CATEGORIES = [
   "Restaurante", "Hotel", "Tienda", "Servicios", "Salud", "Educación", "Tecnología", "Turismo", "Otros"
 ];
 
-export const RATING_OPTIONS = [
-  { emoji: '🔥', label: 'Excelente', value: '🔥' },
-  { emoji: '👍', label: 'Bueno', value: '👍' },
-  { emoji: '😑', label: 'Regular', value: '😑' },
-  { emoji: '🤢', label: 'Malo', value: '🤢' },
-  { emoji: '💩', label: 'Pésimo', value: '💩' },
-];
-
 // Placeholder for initial data so the map isn't empty
 export const INITIAL_BUSINESSES = [
   {
@@ -38,7 +30,7 @@ export const INITIAL_BUSINESSES = [
     description: "El mejor ceviche de Miraflores con pesca del día.",
     phone: "+51 1 234 5678",
     website: "https://elmuelle.pe",
-    rating: '🔥' as const,
+    rating: 4.8,
     lat: -12.1123,
     lng: -77.0435,
     imageUrl: "https://picsum.photos/400/300"
@@ -52,7 +44,7 @@ export const INITIAL_BUSINESSES = [
     description: "Hotel boutique en el corazón del centro histórico.",
     phone: "+51 1 987 6543",
     website: "https://limahistory.com",
-    rating: '😑' as const,
+    rating: 4.5,
     lat: -12.0450,
     lng: -77.0310,
     imageUrl: "https://picsum.photos/401/300"
@@ -66,37 +58,9 @@ export const INITIAL_BUSINESSES = [
     description: "Soluciones de software y hardware empresarial.",
     phone: "+51 1 555 1234",
     website: "https://techsolutions.pe",
-    rating: '💩' as const,
+    rating: 4.2,
     lat: -12.0950,
     lng: -77.0280,
     imageUrl: "https://picsum.photos/402/300"
-  },
-  {
-    id: "4",
-    name: "Bodega Don Pepe",
-    category: "Tienda",
-    district: "Lince",
-    address: "Av. Arequipa 2000",
-    description: "Bodega surtida con productos de primera necesidad.",
-    phone: "+51 1 444 5555",
-    website: "",
-    rating: '👍' as const,
-    lat: -12.0850,
-    lng: -77.0350,
-    imageUrl: "https://picsum.photos/403/300"
-  },
-  {
-    id: "5",
-    name: "Clínica San Juan",
-    category: "Salud",
-    district: "Jesús María",
-    address: "Av. Brasil 1000",
-    description: "Atención médica de urgencia y especialidades.",
-    phone: "+51 1 333 2222",
-    website: "https://clinicasanjuan.pe",
-    rating: '🤢' as const,
-    lat: -12.0700,
-    lng: -77.0450,
-    imageUrl: "https://picsum.photos/404/300"
   }
 ];

@@ -4,13 +4,15 @@ let aiClient: GoogleGenAI | null = null;
 
 // Initialize client safely, checking if process is defined in the environment
 try {
-  if (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) {
-    aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  // @ts-ignore
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    // @ts-ignore
+    aiClient = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  } else {
+    console.warn("Gemini API Key not found in environment variables.");
   }
 } catch (error) {
-  if (!(error instanceof ReferenceError)) {
-    console.warn("Error initializing Gemini AI:", error);
-  }
+  console.warn("Error accessing process.env", error);
 }
 
 export const generateBusinessDescription = async (
@@ -36,11 +38,11 @@ export const generateBusinessDescription = async (
     `;
 
     const response = await aiClient.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
     });
 
-    return response.text?.trim() || `Un excelente ${category.toLowerCase()} ubicado en ${district}.`;
+    return response.text.trim();
   } catch (error) {
     console.error("Error generating description with Gemini:", error);
     return `Un excelente ${category.toLowerCase()} ubicado en ${district}.`;

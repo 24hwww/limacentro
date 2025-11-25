@@ -1,6 +1,3 @@
-// Rating emojis: 🔥 (excelente) > 👍 (bueno) > 😑 (regular) > 🤢 (malo) > 💩 (pésimo)
-export type RatingEmoji = '🔥' | '👍' | '😑' | '🤢' | '💩';
-
 export interface Business {
   id: string;
   name: string;
@@ -8,16 +5,13 @@ export interface Business {
   district: string;
   address: string;
   description: string;
-  phone?: string | null;
-  website?: string | null;
-  rating: RatingEmoji;
+  phone: string;
+  website: string;
+  rating: number;
   lat: number;
   lng: number;
   imageUrl?: string;
   ownerId?: string;
-  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
 }
 
 export interface User {

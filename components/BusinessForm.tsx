@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { LIMA_DISTRICTS, CATEGORIES, RATING_OPTIONS } from '../constants';
-import { geocodeAddress } from '../lib/geocodingService';
-import { generateBusinessDescription } from '../lib/geminiService';
-import { Business, RatingEmoji } from '../types';
+import { LIMA_DISTRICTS, CATEGORIES } from '../constants';
+import { geocodeAddress } from '../services/geocodingService';
+import { generateBusinessDescription } from '../services/geminiService';
+import { Business } from '../types';
 import { Loader2, Wand2, MapPin, Save, X } from 'lucide-react';
 
 interface BusinessFormProps {
@@ -23,10 +23,10 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
     description: '',
     phone: '',
     website: '',
-    rating: '👍', // Default rating
+    rating: 5, // Default rating
   });
 
-  const [previewCoords, setPreviewCoords] = useState<{ lat: number, lng: number } | null>(null);
+  const [previewCoords, setPreviewCoords] = useState<{lat: number, lng: number} | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,16 +37,12 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
     }
   };
 
-  const handleRatingChange = (rating: RatingEmoji) => {
-    setFormData(prev => ({ ...prev, rating }));
-  };
-
   const handleGeocode = async () => {
     if (!formData.address || !formData.district) {
       setError("Por favor ingresa una dirección y selecciona un distrito.");
       return;
     }
-
+    
     setLoadingGeo(true);
     setError(null);
     try {
@@ -90,14 +86,16 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
       setError("Debes validar la ubicación en el mapa antes de guardar (Click en 'Ubicar').");
       return;
     }
-    if (!formData.name || !formData.description) {
-      setError("Completa los campos obligatorios.");
+    
+    // Validación estricta según requisitos del proyecto
+    if (!formData.name || !formData.description || !formData.phone || !formData.website) {
+      setError("Por favor completa todos los campos obligatorios, incluyendo contacto.");
       return;
     }
 
     const newBusiness: Business = {
-      ...formData as Business,
       id: crypto.randomUUID(),
+      ...formData as Business,
       lat: previewCoords.lat,
       lng: previewCoords.lng,
       imageUrl: `https://picsum.photos/seed/${formData.name}/400/300` // Random image for demo
@@ -109,182 +107,168 @@ export const BusinessForm: React.FC<BusinessFormProps> = ({ onCancel, onSave }) 
   return (
     <div className="p-6 bg-white h-full overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Registrar Negocio</h2>
-        <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-full">
-          <X className="w-6 h-6 text-gray-500" />
+        <h2 className="text-2xl font-extrabold text-gray-900">Registrar Negocio</h2>
+        <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-full focus:ring-2 focus:ring-blue-500" aria-label="Cancelar">
+          <X className="w-6 h-6 text-gray-600" />
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+        <div role="alert" className="mb-4 p-4 bg-red-50 text-red-800 text-sm rounded-md border border-red-200 font-medium">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Basic Info */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Negocio</label>
+            <label htmlFor="name" className="block text-base font-semibold text-gray-900 mb-2">Nombre del Negocio *</label>
             <input
+              id="name"
               type="text"
               name="name"
               required
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder:text-gray-500"
               placeholder="Ej. Restaurante Central"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+              <label htmlFor="category" className="block text-base font-semibold text-gray-900 mb-2">Categoría *</label>
               <select
+                id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900 focus:ring-2 focus:ring-blue-600"
               >
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Distrito</label>
+              <label htmlFor="district" className="block text-base font-semibold text-gray-900 mb-2">Distrito *</label>
               <select
+                id="district"
                 name="district"
                 value={formData.district}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900 focus:ring-2 focus:ring-blue-600"
               >
                 {LIMA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
           </div>
-
-          {/* Rating Selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Calificación Inicial</label>
-            <div className="flex gap-2">
-              {RATING_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleRatingChange(option.value as RatingEmoji)}
-                  className={`
-                    p-2 rounded-lg text-2xl transition-all border
-                    ${formData.rating === option.value
-                      ? 'bg-blue-50 border-blue-500 scale-110 shadow-sm'
-                      : 'bg-white border-gray-200 hover:bg-gray-50 grayscale opacity-70 hover:opacity-100 hover:grayscale-0'
-                    }
-                  `}
-                  title={option.label}
-                >
-                  {option.emoji}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Location Section */}
-        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-          <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-            <MapPin className="w-4 h-4 mr-2" /> Ubicación
+        <div className="bg-slate-50 p-5 rounded-xl border border-slate-300">
+          <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+            <MapPin className="w-5 h-5 mr-2 text-blue-700" /> Ubicación *
           </h3>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Dirección (Incluir Av./Jr./Calle y número)</label>
-              <div className="flex gap-2">
+          <div className="space-y-4">
+             <div>
+              <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">Dirección (Incluir Av./Jr./Calle y número)</label>
+              <div className="flex gap-3">
                 <input
+                  id="address"
                   type="text"
                   name="address"
                   required
                   value={formData.address}
                   onChange={handleInputChange}
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  className="flex-1 border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900 placeholder:text-gray-500"
                   placeholder="Ej. Av. Larco 1348"
                 />
                 <button
                   type="button"
                   onClick={handleGeocode}
                   disabled={loadingGeo}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center"
+                  className="bg-blue-700 text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-blue-800 disabled:opacity-70 flex items-center focus:ring-2 focus:ring-offset-2 focus:ring-blue-700"
                 >
-                  {loadingGeo ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Ubicar'}
+                  {loadingGeo ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Ubicar'}
                 </button>
               </div>
-            </div>
-            {previewCoords && (
-              <div className="text-xs text-green-600 font-medium flex items-center bg-green-50 p-2 rounded">
-                ✓ Coordenadas encontradas: {previewCoords.lat.toFixed(4)}, {previewCoords.lng.toFixed(4)}
-              </div>
-            )}
+             </div>
+             {previewCoords && (
+               <div className="text-sm text-green-800 font-semibold flex items-center bg-green-100 p-3 rounded border border-green-200">
+                 ✓ Coordenadas encontradas: {previewCoords.lat.toFixed(4)}, {previewCoords.lng.toFixed(4)}
+               </div>
+             )}
           </div>
         </div>
 
         {/* AI Description Section */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
-            <span>Descripción</span>
+          <div className="flex justify-between mb-2 items-center">
+            <label htmlFor="description" className="block text-base font-semibold text-gray-900">Descripción *</label>
             <button
               type="button"
               onClick={handleAIGenerate}
               disabled={loadingAI}
-              className="text-xs text-purple-600 hover:text-purple-800 flex items-center font-bold"
+              className="text-sm text-purple-700 hover:text-purple-900 flex items-center font-bold focus:outline-none focus:underline"
             >
-              {loadingAI ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Wand2 className="w-3 h-3 mr-1" />}
+              {loadingAI ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Wand2 className="w-4 h-4 mr-1.5" />}
               Generar con AI
             </button>
-          </label>
+          </div>
           <textarea
+            id="description"
             name="description"
+            required
             rows={4}
             value={formData.description}
             onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            className="w-full border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900 placeholder:text-gray-500"
             placeholder="Describe los servicios, ambiente, etc."
           />
         </div>
 
         {/* Contact Info */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono / WhatsApp</label>
+            <label htmlFor="phone" className="block text-base font-semibold text-gray-900 mb-2">Teléfono / WhatsApp *</label>
             <input
+              id="phone"
               type="tel"
               name="phone"
-              value={formData.phone || ''}
+              required
+              value={formData.phone}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              className="w-full border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
+             <label htmlFor="website" className="block text-base font-semibold text-gray-900 mb-2">Sitio Web *</label>
             <input
+              id="website"
               type="url"
               name="website"
-              value={formData.website || ''}
+              required
+              value={formData.website}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              className="w-full border border-gray-400 rounded-lg px-4 py-3 text-base text-gray-900"
               placeholder="https://..."
             />
           </div>
         </div>
 
-        <div className="pt-4 flex gap-3">
-          <button
+        <div className="pt-6 flex gap-4">
+           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-4 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 px-6 py-4 bg-white text-gray-800 border border-gray-300 rounded-xl font-bold text-base hover:bg-gray-50 transition-colors"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="flex-1 px-4 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex justify-center items-center shadow-lg"
+            className="flex-1 px-6 py-4 bg-gray-900 text-white rounded-xl font-bold text-base hover:bg-black transition-colors flex justify-center items-center shadow-lg"
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-5 h-5 mr-2" />
             Guardar Negocio
           </button>
         </div>
