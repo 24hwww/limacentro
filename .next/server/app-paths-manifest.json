@@ -1,0 +1,6 @@
+{
+  "/api/analytics/ping/route": "app/api/analytics/ping/route.js",
+  "/api/analytics/online/route": "app/api/analytics/online/route.js",
+  "/api/businesses/route": "app/api/businesses/route.js",
+  "/page": "app/page.js"
+}

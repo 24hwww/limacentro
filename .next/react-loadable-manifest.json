@@ -1,0 +1,22 @@
+{
+  "app\\page.tsx -> ../components/MapComponent": {
+    "id": "app\\page.tsx -> ../components/MapComponent",
+    "files": [
+      "static/chunks/_app-pages-browser_components_MapComponent_tsx.js"
+    ]
+  },
+  "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @simplewebauthn/browser": {
+    "id": "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @simplewebauthn/browser",
+    "files": []
+  },
+  "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @stackframe/stack-shared/dist/utils/errors": {
+    "id": "node_modules\\@stackframe\\stack\\dist\\esm\\lib\\stack-app\\apps\\implementations\\server-app-impl.js -> @stackframe/stack-shared/dist/utils/errors",
+    "files": []
+  },
+  "node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts": {
+    "id": "node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts",
+    "files": [
+      "static/chunks/_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js"
+    ]
+  }
+}
