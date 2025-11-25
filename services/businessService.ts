@@ -1,19 +1,35 @@
-import { queryOne, queryMany } from './db';
+import { db } from './db';
 import { Business } from '../types';
+import { Prisma } from '@prisma/client';
+
+// Helper to map Prisma result to Business interface
+function mapPrismaBusiness(b: any): Business {
+  return {
+    id: b.id,
+    ownerId: b.userId,
+    name: b.name,
+    category: b.category,
+    district: b.district,
+    address: b.address,
+    description: b.description || '',
+    phone: b.phone || '',
+    website: b.website || '',
+    rating: b.rating ? Number(b.rating) : 5.0,
+    lat: Number(b.lat),
+    lng: Number(b.lng),
+    imageUrl: b.imageUrl || undefined,
+  };
+}
 
 /**
  * Get all businesses
  */
 export async function getAllBusinesses(): Promise<Business[]> {
   try {
-    const businesses = await queryMany(
-      `SELECT 
-        id, user_id as "ownerId", name, category, district, address, 
-        description, phone, website, rating, lat, lng, image_url as "imageUrl"
-       FROM businesses
-       ORDER BY created_at DESC`
-    );
-    return businesses;
+    const businesses = await db.business.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return businesses.map(mapPrismaBusiness);
   } catch (error) {
     console.error('Get all businesses error:', error);
     throw error;
@@ -25,16 +41,11 @@ export async function getAllBusinesses(): Promise<Business[]> {
  */
 export async function getBusinessesByUserId(userId: number): Promise<Business[]> {
   try {
-    const businesses = await queryMany(
-      `SELECT 
-        id, user_id as "ownerId", name, category, district, address, 
-        description, phone, website, rating, lat, lng, image_url as "imageUrl"
-       FROM businesses
-       WHERE user_id = $1
-       ORDER BY created_at DESC`,
-      [userId]
-    );
-    return businesses;
+    const businesses = await db.business.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return businesses.map(mapPrismaBusiness);
   } catch (error) {
     console.error('Get businesses by user error:', error);
     throw error;
@@ -46,15 +57,10 @@ export async function getBusinessesByUserId(userId: number): Promise<Business[]>
  */
 export async function getBusinessById(businessId: number): Promise<Business | null> {
   try {
-    const business = await queryOne(
-      `SELECT 
-        id, user_id as "ownerId", name, category, district, address, 
-        description, phone, website, rating, lat, lng, image_url as "imageUrl"
-       FROM businesses
-       WHERE id = $1`,
-      [businessId]
-    );
-    return business || null;
+    const business = await db.business.findUnique({
+      where: { id: businessId },
+    });
+    return business ? mapPrismaBusiness(business) : null;
   } catch (error) {
     console.error('Get business error:', error);
     throw error;
@@ -69,30 +75,24 @@ export async function createBusiness(
   businessData: Omit<Business, 'id' | 'ownerId'>
 ): Promise<Business> {
   try {
-    const business = await queryOne(
-      `INSERT INTO businesses 
-        (user_id, name, category, district, address, description, phone, website, rating, lat, lng, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-       RETURNING 
-        id, user_id as "ownerId", name, category, district, address, 
-        description, phone, website, rating, lat, lng, image_url as "imageUrl"`,
-      [
+    const business = await db.business.create({
+      data: {
         userId,
-        businessData.name,
-        businessData.category,
-        businessData.district,
-        businessData.address,
-        businessData.description,
-        businessData.phone,
-        businessData.website,
-        businessData.rating || 5,
-        businessData.lat,
-        businessData.lng,
-        businessData.imageUrl,
-      ]
-    );
+        name: businessData.name,
+        category: businessData.category,
+        district: businessData.district,
+        address: businessData.address,
+        description: businessData.description,
+        phone: businessData.phone,
+        website: businessData.website,
+        rating: businessData.rating || 5.0,
+        lat: businessData.lat,
+        lng: businessData.lng,
+        imageUrl: businessData.imageUrl,
+      },
+    });
 
-    return business;
+    return mapPrismaBusiness(business);
   } catch (error) {
     console.error('Create business error:', error);
     throw error;
@@ -109,47 +109,32 @@ export async function updateBusiness(
 ): Promise<Business> {
   try {
     // Verify ownership
-    const business = await getBusinessById(businessId);
-    if (!business || business.ownerId !== userId) {
+    const existingBusiness = await db.business.findUnique({
+      where: { id: businessId },
+    });
+
+    if (!existingBusiness || existingBusiness.userId !== userId) {
       throw new Error('Unauthorized');
     }
 
-    const updated = await queryOne(
-      `UPDATE businesses 
-       SET 
-        name = COALESCE($2, name),
-        category = COALESCE($3, category),
-        district = COALESCE($4, district),
-        address = COALESCE($5, address),
-        description = COALESCE($6, description),
-        phone = COALESCE($7, phone),
-        website = COALESCE($8, website),
-        rating = COALESCE($9, rating),
-        lat = COALESCE($10, lat),
-        lng = COALESCE($11, lng),
-        image_url = COALESCE($12, image_url),
-        updated_at = CURRENT_TIMESTAMP
-       WHERE id = $1
-       RETURNING 
-        id, user_id as "ownerId", name, category, district, address, 
-        description, phone, website, rating, lat, lng, image_url as "imageUrl"`,
-      [
-        businessId,
-        updates.name || null,
-        updates.category || null,
-        updates.district || null,
-        updates.address || null,
-        updates.description || null,
-        updates.phone || null,
-        updates.website || null,
-        updates.rating || null,
-        updates.lat || null,
-        updates.lng || null,
-        updates.imageUrl || null,
-      ]
-    );
+    const updated = await db.business.update({
+      where: { id: businessId },
+      data: {
+        name: updates.name,
+        category: updates.category,
+        district: updates.district,
+        address: updates.address,
+        description: updates.description,
+        phone: updates.phone,
+        website: updates.website,
+        rating: updates.rating,
+        lat: updates.lat,
+        lng: updates.lng,
+        imageUrl: updates.imageUrl,
+      },
+    });
 
-    return updated;
+    return mapPrismaBusiness(updated);
   } catch (error) {
     console.error('Update business error:', error);
     throw error;
@@ -162,15 +147,17 @@ export async function updateBusiness(
 export async function deleteBusiness(businessId: number, userId: number): Promise<void> {
   try {
     // Verify ownership
-    const business = await getBusinessById(businessId);
-    if (!business || business.ownerId !== userId) {
+    const existingBusiness = await db.business.findUnique({
+      where: { id: businessId },
+    });
+
+    if (!existingBusiness || existingBusiness.userId !== userId) {
       throw new Error('Unauthorized');
     }
 
-    await queryOne(
-      'DELETE FROM businesses WHERE id = $1',
-      [businessId]
-    );
+    await db.business.delete({
+      where: { id: businessId },
+    });
   } catch (error) {
     console.error('Delete business error:', error);
     throw error;
@@ -186,29 +173,27 @@ export async function searchBusinesses(
   category?: string
 ): Promise<Business[]> {
   try {
-    let sql = `
-      SELECT 
-        id, user_id as "ownerId", name, category, district, address, 
-        description, phone, website, rating, lat, lng, image_url as "imageUrl"
-       FROM businesses
-       WHERE (name ILIKE $1 OR description ILIKE $1)
-    `;
-    const params: any[] = [`%${query}%`];
+    const where: Prisma.BusinessWhereInput = {
+      OR: [
+        { name: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+      ],
+    };
 
     if (district) {
-      sql += ` AND district = $${params.length + 1}`;
-      params.push(district);
+      where.district = district;
     }
 
     if (category) {
-      sql += ` AND category = $${params.length + 1}`;
-      params.push(category);
+      where.category = category;
     }
 
-    sql += ' ORDER BY created_at DESC';
+    const businesses = await db.business.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
-    const businesses = await queryMany(sql, params);
-    return businesses;
+    return businesses.map(mapPrismaBusiness);
   } catch (error) {
     console.error('Search businesses error:', error);
     throw error;
