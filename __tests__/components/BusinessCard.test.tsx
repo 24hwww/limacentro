@@ -73,6 +73,8 @@ describe('BusinessCard Component', () => {
       />
     );
 
-    expect(screen.getByText(/4.5/)).toBeInTheDocument();
+    // Rating 4.5 gets rounded to 5, which displays as "Excelente"
+    expect(screen.getByText('Excelente')).toBeInTheDocument();
+    expect(screen.getByText('🤩')).toBeInTheDocument();
   });
 });
