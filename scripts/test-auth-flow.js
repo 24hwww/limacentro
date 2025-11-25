@@ -6,7 +6,7 @@
  * 2. En otra terminal: node scripts/test-auth-flow.js
  */
 
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch'); // Native fetch used in Node 18+
 
 const API_URL = 'http://localhost:3000';
 
