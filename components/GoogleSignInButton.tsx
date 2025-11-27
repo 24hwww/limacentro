@@ -1,11 +1,17 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { useStackApp } from "@stackframe/stack";
 
 export default function GoogleSignInButton() {
+    const app = useStackApp();
+
+    const handleSignIn = async () => {
+        await app.signInWithOAuth("google");
+    };
+
     return (
         <button
-            onClick={() => signIn('google')}
+            onClick={handleSignIn}
             className="flex items-center justify-center w-full gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
         >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
