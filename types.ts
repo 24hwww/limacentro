@@ -1,23 +1,17 @@
-// Rating emojis: 🔥 (excelente) > 👍 (bueno) > 😑 (regular) > 🤢 (malo) > 💩 (pésimo)
-export type RatingEmoji = '🔥' | '👍' | '😑' | '🤢' | '💩';
-
 export interface Business {
-  id: string;
+  id: string | number;
   name: string;
   category: string;
   district: string;
   address: string;
   description: string;
-  phone?: string | null;
-  website?: string | null;
-  rating: RatingEmoji;
+  phone: string;
+  website: string;
+  rating: number;
   lat: number;
   lng: number;
   imageUrl?: string;
-  ownerId?: string;
-  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
+  ownerId?: string | number;
 }
 
 export interface User {
@@ -32,4 +26,10 @@ export type ViewState = 'LIST' | 'ADD_BUSINESS' | 'DETAILS';
 export interface Coordinates {
   lat: number;
   lng: number;
+}
+
+declare global {
+  interface Window {
+    gtag: (param1: string, param2: string, param3: object) => void;
+  }
 }

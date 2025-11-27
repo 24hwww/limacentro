@@ -11,10 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
-
-# Next.js
-.next/
-out/
+.next
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -26,4 +25,5 @@ out/
 *.njsproj
 *.sln
 *.sw?
-.env
+
+/generated/prisma
