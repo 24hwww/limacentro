@@ -7,7 +7,10 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
-  }
+  },
+  experimental: {
+    esmExternals: 'loose', // Fix para ERR_REQUIRE_ESM con Stack Auth
+  },
 }
 
-module.exports = nextConfig
+export default nextConfig;

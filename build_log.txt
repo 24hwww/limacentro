@@ -1,0 +1,38 @@
+﻿
+> limacentro@0.0.0 build
+> next build
+
+   Ôû▓ Next.js 15.5.6
+   - Environments: .env.local, .env
+
+   Skipping validation of types
+   Skipping linting
+   Creating an optimized production build ...
+ Ô£ô Compiled successfully in 3.2s
+   Collecting page data ...
+node.exe : unhandledRejection [Error: 
+require() of ES Module C:\laragon\www\git-l
+imacentro\node_modules\oauth4webapi\build\i
+ndex.js from C:\laragon\www\git-limacentro\
+node_modules\@stackframe\stack\node_modules
+\@stackframe\stack-shared\dist\interface\cl
+ient-interface.js not supported.
+En C:\Program Files\nodejs\npm.ps1: 29 
+Carácter: 3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified 
+   : (unhandledReject... not supported.:S  
+  tring) [], RemoteException
+    + FullyQualifiedErrorId : NativeComman 
+   dError
+ 
+Instead change the require of index.js in C
+:\laragon\www\git-limacentro\node_modules\@
+stackframe\stack\node_modules\@stackframe\s
+tack-shared\dist\interface\client-interface
+.js to a dynamic import() which is 
+available in all CommonJS modules.] {
+  type: 'Error',
+  code: 'ERR_REQUIRE_ESM'
+}
