@@ -9,6 +9,7 @@ import { BusinessDetailView } from '../components/BusinessDetailView';
 import { Footer } from '../components/Footer';
 import { Search, Map as MapIcon, Plus, LogOut, Menu } from 'lucide-react';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { OnlineUsersCounter } from '../components/OnlineUsersCounter';
 
 // Dynamic Map Import
 const MapBoard = dynamic(() => import('../components/MapBoard'), {
@@ -114,10 +115,9 @@ export default function HomePage() {
       >
         {/* HEADER */}
         <div className="p-4 sm:p-5 bg-white border-b border-gray-200 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col">
-              <h1 className="text-xl sm:text-2xl tracking-tight">LIMACENTRO</h1>
-            </div>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-xl sm:text-2xl tracking-tight">LIMACENTRO</h1>
+            <OnlineUsersCounter />
           </div>
           <div className="mt-3 sm:mt-4">
             <UserProfileRenderer>
