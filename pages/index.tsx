@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { useUser } from '@stackframe/stack';
 import { Business, ViewState, Coordinates } from '../types';
 import { LIMA_CENTER, LIMA_DISTRICTS, CATEGORIES } from '../constants';
 import { getBusinesses, addBusiness } from '../services/mockDatabase';
@@ -17,10 +16,12 @@ const MapBoard = dynamic(() => import('../components/MapBoard'), {
   loading: () => <div className="w-full h-full bg-[#262626] flex items-center justify-center text-gray-500">Cargando mapa de Lima...</div>
 });
 
-export default function HomePage() {
-  // Stack Auth user
-  const user = useUser();
+// Dynamic User Profile Import (client-only)
+const UserProfileRenderer = dynamic(() => import('../components/UserProfileRenderer'), {
+  ssr: false,
+});
 
+export default function HomePage() {
   // State declarations
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [viewState, setViewState] = useState<ViewState>('LIST');
@@ -51,10 +52,6 @@ export default function HomePage() {
     [businesses, activeBusinessId]);
 
   // Handlers
-  const handleLogout = async () => {
-    await user?.signOut();
-  };
-
   const handleBusinessClick = (b: Business) => {
     setMapCenter({ lat: b.lat, lng: b.lng });
     setActiveBusinessId(String(b.id));
@@ -123,19 +120,30 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mt-3 sm:mt-4">
-            {user ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex-shrink-0" />
-                  <span className="text-sm font-medium text-gray-900 truncate">{user.name}</span>
+            <UserProfileRenderer>
+              {(user) => user ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    {user.image && (
+                      <img src={user.image} alt={user.name || 'Usuario'} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex-shrink-0" />
+                    )}
+                    <span className="text-sm font-medium text-gray-900 truncate">{user.name}</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const { signOut } = await import('next-auth/react');
+                      await signOut();
+                    }}
+                    className="text-gray-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                    aria-label="Cerrar sesión"
+                  >
+                    <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
                 </div>
-                <button onClick={handleLogout} className="text-gray-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors" aria-label="Cerrar sesión">
-                  <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
-              </div>
-            ) : (
-              <GoogleSignInButton />
-            )}
+              ) : (
+                <GoogleSignInButton />
+              )}
+            </UserProfileRenderer>
           </div>
         </div>
 
@@ -176,18 +184,20 @@ export default function HomePage() {
               </div>
 
               {/* ACTION BAR */}
-              {user && (
-                <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-blue-50 border-b border-blue-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 flex-shrink-0">
-                  <span className="text-xs sm:text-sm font-bold text-blue-900">¿Tienes un negocio?</span>
-                  <button
-                    onClick={() => setViewState('ADD_BUSINESS')}
-                    className="flex items-center justify-center gap-1.5 bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold hover:bg-blue-800 transition-colors shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                  >
-                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    Registrar Gratis
-                  </button>
-                </div>
-              )}
+              <UserProfileRenderer>
+                {(user) => user && (
+                  <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-blue-50 border-b border-blue-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 flex-shrink-0">
+                    <span className="text-xs sm:text-sm font-bold text-blue-900">¿Tienes un negocio?</span>
+                    <button
+                      onClick={() => setViewState('ADD_BUSINESS')}
+                      className="flex items-center justify-center gap-1.5 bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold hover:bg-blue-800 transition-colors shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    >
+                      <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Registrar Gratis
+                    </button>
+                  </div>
+                )}
+              </UserProfileRenderer>
 
               {/* LIST */}
               <div className="flex-1 overflow-y-auto custom-scrollbar bg-white flex flex-col">

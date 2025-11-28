@@ -32,7 +32,7 @@ describe('AuthModal', () => {
   it('should render login form by default', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} />);
 
-    expect(screen.getByText('Iniciar Sesión')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Iniciar Sesión' })).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Contraseña')).toBeInTheDocument();
     expect(screen.queryByLabelText('Nombre')).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('AuthModal', () => {
     const toggleButton = screen.getByText('Registrarse');
     await userEvent.click(toggleButton);
 
-    expect(screen.getByText('Registrarse')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Registrarse' })).toBeInTheDocument();
     expect(screen.getByLabelText('Nombre')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Contraseña')).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('AuthModal', () => {
 
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Contraseña');
-    const submitButton = screen.getByText('Iniciar Sesión');
+    const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, 'password123');
@@ -84,7 +84,7 @@ describe('AuthModal', () => {
     const nameInput = screen.getByLabelText('Nombre');
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Contraseña');
-    const submitButton = screen.getByText('Registrarse');
+    const submitButton = screen.getByRole('button', { name: 'Registrarse' });
 
     await userEvent.type(nameInput, 'Test User');
     await userEvent.type(emailInput, 'test@example.com');
@@ -108,7 +108,7 @@ describe('AuthModal', () => {
 
     const emailInput = screen.getByLabelText('Email');
     const passwordInput = screen.getByLabelText('Contraseña');
-    const submitButton = screen.getByText('Iniciar Sesión');
+    const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
 
     await userEvent.type(emailInput, 'test@example.com');
     await userEvent.type(passwordInput, 'wrongpassword');
@@ -121,25 +121,24 @@ describe('AuthModal', () => {
     expect(mockOnClose).not.toHaveBeenCalled();
   });
 
-  it('should show loading state during login', async () => {
-    mockLogin.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-    mockUseAuth.mockReturnValue({
-      login: mockLogin,
-      register: mockRegister,
-      logout: jest.fn(),
-      user: null,
-      token: null,
-      isLoading: true,
-      isAuthenticated: false,
-    });
-
+  it('should show loading state when submitting', async () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} />);
 
-    const submitButton = screen.getByText('Iniciar Sesión');
+    const emailInput = screen.getByLabelText('Email');
+    const passwordInput = screen.getByLabelText('Contraseña');
+    const submitButton = screen.getByRole('button', { name: 'Iniciar Sesión' });
+
+    await userEvent.type(emailInput, 'test@example.com');
+    await userEvent.type(passwordInput, 'password123');
+    
+    // Mock login to take some time
+    mockLogin.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    
     await userEvent.click(submitButton);
 
+    // Check for loading state
     expect(screen.getByText('Procesando...')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toBeDisabled();
+    expect(submitButton).toBeDisabled();
   });
 
   it('should close when close button is clicked', async () => {
