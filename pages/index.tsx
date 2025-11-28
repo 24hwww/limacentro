@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
 import { Business, ViewState, Coordinates } from '../types';
 import { LIMA_CENTER, LIMA_DISTRICTS, CATEGORIES } from '../constants';
 import { getBusinesses, addBusiness } from '../services/mockDatabase';
@@ -23,17 +24,47 @@ const UserProfileRenderer = dynamic(() => import('../components/UserProfileRende
 });
 
 export default function HomePage() {
+  const router = useRouter();
+  
   // State declarations
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [viewState, setViewState] = useState<ViewState>('LIST');
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [mapCenter, setMapCenter] = useState<Coordinates>(LIMA_CENTER);
-  const [activeBusinessId, setActiveBusinessId] = useState<string | null>(null);
 
+  // URL-based state management
+  const viewState = (router.query.view as ViewState) || 'LIST';
+  const searchQuery = (router.query.q as string) || '';
+  const selectedDistrict = (router.query.district as string) || '';
+  const selectedCategory = (router.query.category as string) || '';
+  const activeBusinessId = (router.query.business as string) || null;
+
+  // Update URL when state changes
+  const updateURL = (newParams: Record<string, string | null>) => {
+    const currentQuery = { ...router.query };
+    
+    // Remove null/undefined values
+    Object.keys(newParams).forEach(key => {
+      if (newParams[key] === null || newParams[key] === undefined) {
+        delete currentQuery[key];
+      } else {
+        currentQuery[key] = newParams[key];
+      }
+    });
+
+    // Remove empty view parameter if it's the default
+    if (currentQuery.view === 'LIST') {
+      delete currentQuery.view;
+    }
+
+    router.push(
+      { pathname: router.pathname, query: currentQuery },
+      undefined,
+      { shallow: true }
+    );
+  };
+
+  // Initialize businesses
   useEffect(() => {
     setBusinesses(getBusinesses());
   }, []);
@@ -55,23 +86,89 @@ export default function HomePage() {
   // Handlers
   const handleBusinessClick = (b: Business) => {
     setMapCenter({ lat: b.lat, lng: b.lng });
-    setActiveBusinessId(String(b.id));
-    setViewState('DETAILS');
+    updateURL({ 
+      business: String(b.id), 
+      view: 'DETAILS',
+      q: searchQuery || null,
+      district: selectedDistrict || null,
+      category: selectedCategory || null
+    });
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       setShowSidebarMobile(false);
     }
   };
 
   const handleMapBackgroundClick = () => {
-    setActiveBusinessId(null);
+    updateURL({ 
+      business: null,
+      view: viewState === 'DETAILS' ? 'LIST' : undefined,
+      q: searchQuery || null,
+      district: selectedDistrict || null,
+      category: selectedCategory || null
+    });
   };
 
   const handleSaveBusiness = (newBusiness: Business) => {
     const updated = addBusiness(newBusiness);
     setBusinesses(updated);
-    setViewState('LIST');
     setMapCenter({ lat: newBusiness.lat, lng: newBusiness.lng });
-    setActiveBusinessId(String(newBusiness.id));
+    updateURL({ 
+      business: String(newBusiness.id), 
+      view: 'DETAILS',
+      q: searchQuery || null,
+      district: selectedDistrict || null,
+      category: selectedCategory || null
+    });
+  };
+
+  const handleSearchChange = (value: string) => {
+    updateURL({ 
+      q: value || null,
+      district: selectedDistrict || null,
+      category: selectedCategory || null,
+      business: null,
+      view: 'LIST'
+    });
+  };
+
+  const handleDistrictChange = (value: string) => {
+    updateURL({ 
+      district: value || null,
+      q: searchQuery || null,
+      category: selectedCategory || null,
+      business: null,
+      view: 'LIST'
+    });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    updateURL({ 
+      category: value || null,
+      q: searchQuery || null,
+      district: selectedDistrict || null,
+      business: null,
+      view: 'LIST'
+    });
+  };
+
+  const handleAddBusiness = () => {
+    updateURL({ 
+      view: 'ADD_BUSINESS',
+      business: null,
+      q: searchQuery || null,
+      district: selectedDistrict || null,
+      category: selectedCategory || null
+    });
+  };
+
+  const handleCancelAddBusiness = () => {
+    updateURL({ 
+      view: 'LIST',
+      business: null,
+      q: searchQuery || null,
+      district: selectedDistrict || null,
+      category: selectedCategory || null
+    });
   };
 
   const toggleSidebar = () => setShowSidebarMobile(!showSidebarMobile);
@@ -151,7 +248,7 @@ export default function HomePage() {
         <div className="flex-1 overflow-hidden relative">
           {viewState === 'ADD_BUSINESS' ? (
             <BusinessForm
-              onCancel={() => setViewState('LIST')}
+              onCancel={handleCancelAddBusiness}
               onSave={handleSaveBusiness}
             />
           ) : (
@@ -168,7 +265,7 @@ export default function HomePage() {
                       type="text"
                       placeholder="Buscar restaurantes, servicios..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => handleSearchChange(e.target.value)}
                       className="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-gray-50 border border-gray-300 rounded-lg sm:rounded-xl text-sm sm:text-base text-gray-900 placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-shadow"
                     />
                   </div>
@@ -189,7 +286,7 @@ export default function HomePage() {
                   <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-blue-50 border-b border-blue-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 flex-shrink-0">
                     <span className="text-xs sm:text-sm font-bold text-blue-900">¿Tienes un negocio?</span>
                     <button
-                      onClick={() => setViewState('ADD_BUSINESS')}
+                      onClick={handleAddBusiness}
                       className="flex items-center justify-center gap-1.5 bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold hover:bg-blue-800 transition-colors shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                     >
                       <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -253,7 +350,7 @@ export default function HomePage() {
                 <label className="text-sm font-medium text-gray-700 block mb-2">Distrito</label>
                 <select
                   value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  onChange={(e) => handleDistrictChange(e.target.value)}
                   className="w-full text-base font-medium border border-gray-300 rounded-lg px-3 py-2.5 bg-white text-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Todos los distritos</option>
@@ -264,7 +361,7 @@ export default function HomePage() {
                 <label className="text-sm font-medium text-gray-700 block mb-2">Categoría</label>
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full text-base font-medium border border-gray-300 rounded-lg px-3 py-2.5 bg-white text-gray-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Todas las categorías</option>
@@ -280,7 +377,13 @@ export default function HomePage() {
       {selectedBusiness && (
         <BusinessDetailView
           business={selectedBusiness}
-          onClose={() => setActiveBusinessId(null)}
+          onClose={() => updateURL({ 
+            business: null, 
+            view: 'LIST',
+            q: searchQuery || null,
+            district: selectedDistrict || null,
+            category: selectedCategory || null
+          })}
         />
       )}
     </div>
