@@ -30,6 +30,35 @@ export const Footer: React.FC = () => {
             <div className="mt-1 text-[9px] text-gray-400">
                 &copy; {new Date().getFullYear()} LimaCentro
             </div>
+
+            <div className="mt-1 text-[8px] text-gray-400">
+                <a
+                    href="https://leafletjs.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 transition-colors"
+                >
+                    Leaflet
+                </a>
+                {' | '}
+                <a
+                    href="https://www.openstreetmap.org/copyright"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 transition-colors"
+                >
+                    © OpenStreetMap contributors
+                </a>
+                {' '}
+                <a
+                    href="https://carto.com/attributions"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-600 transition-colors"
+                >
+                    © CARTO
+                </a>
+            </div>
         </footer>
     );
 };
