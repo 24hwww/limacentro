@@ -44,29 +44,29 @@ interface MapBoardProps {
 }
 
 const MapBoard: React.FC<MapBoardProps> = ({ center, businesses, onMarkerClick, onMapBackgroundClick }) => {
-  
+
   useEffect(() => {
     fixLeafletIcons();
   }, []);
 
   return (
-    <MapContainer 
-      center={[LIMA_CENTER.lat, LIMA_CENTER.lng]} 
-      zoom={12} 
-      scrollWheelZoom={true} 
+    <MapContainer
+      center={[LIMA_CENTER.lat, LIMA_CENTER.lng]}
+      zoom={12}
+      scrollWheelZoom={true}
       zoomControl={false}
       style={{ height: '100%', width: '100%', background: '#262626' }}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attribution=''
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
       />
       <MapController center={center} />
       <MapClickHandler onMapClick={onMapBackgroundClick} />
-      
+
       {businesses.map(b => (
-        <Marker 
-          key={b.id} 
+        <Marker
+          key={b.id}
           position={[b.lat, b.lng]}
           eventHandlers={{
             click: (e) => {
