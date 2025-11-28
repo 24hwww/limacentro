@@ -1,12 +1,10 @@
 'use client';
 
-import { useStackApp } from "@stackframe/stack";
+import { signIn } from "next-auth/react";
 
 export default function GoogleSignInButton() {
-    const app = useStackApp();
-
     const handleSignIn = async () => {
-        await app.signInWithOAuth("google");
+        await signIn("google", { callbackUrl: "/" });
     };
 
     return (

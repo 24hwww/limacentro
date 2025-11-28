@@ -21,13 +21,13 @@ const TestComponent = () => {
     <div>
       <div data-testid="isAuthenticated">{isAuthenticated.toString()}</div>
       <div data-testid="user">{user ? user.name : 'No user'}</div>
-      <button onClick={() => login('test@example.com', 'password123')}>
+      <button onClick={() => login('test@example.com', 'password123').catch(() => {})}>
         Login
       </button>
-      <button onClick={() => register('test@example.com', 'password123', 'Test User')}>
+      <button onClick={() => register('test@example.com', 'password123', 'Test User').catch(() => {})}>
         Register
       </button>
-      <button onClick={logout}>Logout</button>
+      <button onClick={() => logout().catch(() => {})}>Logout</button>
     </div>
   );
 };
@@ -71,7 +71,7 @@ describe('AuthContext', () => {
       user: { id: 1, email: 'test@example.com', name: 'Test User' }
     };
     
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    (fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     });
@@ -84,9 +84,7 @@ describe('AuthContext', () => {
 
     const loginButton = screen.getByText('Login');
     
-    await act(async () => {
-      userEvent.click(loginButton);
-    });
+    await userEvent.click(loginButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('true');
@@ -94,6 +92,11 @@ describe('AuthContext', () => {
     });
 
     expect(setAuthToken).toHaveBeenCalledWith('test-token');
+    expect(fetch).toHaveBeenCalledWith('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
+    });
   });
 
   it('should handle login error', async () => {
@@ -101,6 +104,9 @@ describe('AuthContext', () => {
       ok: false,
       json: async () => ({ error: 'Invalid credentials' }),
     });
+
+    // Mock console.error to avoid error output in test
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <AuthProvider>
@@ -110,9 +116,7 @@ describe('AuthContext', () => {
 
     const loginButton = screen.getByText('Login');
     
-    await act(async () => {
-      userEvent.click(loginButton);
-    });
+    await userEvent.click(loginButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('false');
@@ -120,6 +124,9 @@ describe('AuthContext', () => {
     });
 
     expect(setAuthToken).not.toHaveBeenCalled();
+    
+    // Restore console
+    consoleSpy.mockRestore();
   });
 
   it('should register successfully', async () => {
@@ -145,9 +152,7 @@ describe('AuthContext', () => {
 
     const registerButton = screen.getByText('Register');
     
-    await act(async () => {
-      userEvent.click(registerButton);
-    });
+    await userEvent.click(registerButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('true');
@@ -182,9 +187,7 @@ describe('AuthContext', () => {
 
     const loginButton = screen.getByText('Login');
     
-    await act(async () => {
-      userEvent.click(loginButton);
-    });
+    await userEvent.click(loginButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('true');
@@ -193,9 +196,7 @@ describe('AuthContext', () => {
     // Then logout
     const logoutButton = screen.getByText('Logout');
     
-    await act(async () => {
-      userEvent.click(logoutButton);
-    });
+    await userEvent.click(logoutButton);
 
     await waitFor(() => {
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('false');

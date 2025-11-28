@@ -17,6 +17,14 @@ jest.mock('@/services/api', () => ({
   clearAuthToken: jest.fn(),
 }));
 
+// Mock Stack Auth library to avoid ESM issues in Jest and provide noop hooks
+jest.mock('@stackframe/stack', () => ({
+  useUser: jest.fn(() => null),
+  useStackApp: jest.fn(() => ({
+    signInWithOAuth: jest.fn(async () => {}),
+  })),
+}));
+
 // Mock fetch
 global.fetch = jest.fn();
 
