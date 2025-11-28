@@ -2,7 +2,6 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SessionProvider } from 'next-auth/react'
 import GoogleAnalytics from '@/components/GoogleAnalytics';
-import { OnlineUsersCounter } from '@/components/OnlineUsersCounter';
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
@@ -13,7 +12,6 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
       </Head>
       <GoogleAnalytics />
       <Component {...pageProps} />
-      <OnlineUsersCounter />
     </SessionProvider>
   )
 }
