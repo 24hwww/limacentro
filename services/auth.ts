@@ -2,8 +2,12 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from './db';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = '7d';
+
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production');
+}
 
 export interface AuthUser {
   id: number;
@@ -36,9 +40,10 @@ export async function comparePassword(password: string, hash: string): Promise<b
  * Generate a JWT token
  */
 export function generateToken(user: AuthUser): string {
+  const secret = JWT_SECRET || 'development-only-jwt-secret';
   return jwt.sign(
     { id: user.id, email: user.email },
-    JWT_SECRET,
+    secret,
     { expiresIn: JWT_EXPIRY }
   );
 }
@@ -48,7 +53,8 @@ export function generateToken(user: AuthUser): string {
  */
 export function verifyToken(token: string): AuthUser | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const secret = JWT_SECRET || 'development-only-jwt-secret';
+    const decoded = jwt.verify(token, secret) as any;
     return {
       id: decoded.id,
       email: decoded.email,

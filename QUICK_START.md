@@ -21,20 +21,31 @@
 
 ### Paso 2: Configurar Variables de Entorno (2 minutos)
 
-Abre `.env.local` y agrega:
+Primero crea tu archivo local:
+
+```bash
+cp .env.example .env.local
+```
+
+Luego abre `.env.local` y agrega tus valores reales:
 
 ```env
 # Neon Database Connection
 DATABASE_URL=postgresql://user:password@ep-xxx.us-east-1.neon.tech/neondb?sslmode=require
 
-# JWT Secret (genera uno seguro)
-JWT_SECRET=your-super-secret-jwt-key-here-change-in-production
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-super-secret-nextauth-key
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # API URL (para desarrollo local)
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-**Para generar JWT_SECRET seguro:**
+**Para generar NEXTAUTH_SECRET seguro:**
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
@@ -67,61 +78,13 @@ npx ts-node scripts/init-db.ts
    ```
 5. Deberías ver las tablas `users` y `businesses`
 
-### Paso 5: Probar API (5 minutos)
+### Paso 5: Probar autenticación y API (5 minutos)
 
-**Registrar usuario:**
-```bash
-curl -X POST http://localhost:3001/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123",
-    "name": "Test User"
-  }'
-```
-
-**Respuesta esperada:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "user": {
-    "id": 1,
-    "email": "test@example.com",
-    "name": "Test User",
-    "avatarUrl": "https://api.dicebear.com/..."
-  }
-}
-```
-
-**Iniciar sesión:**
-```bash
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123"
-  }'
-```
-
-**Crear negocio:**
-```bash
-curl -X POST http://localhost:3001/api/businesses \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -d '{
-    "name": "Mi Restaurante",
-    "category": "Restaurante",
-    "district": "Miraflores",
-    "address": "Av. Larco 1234",
-    "description": "Comida deliciosa",
-    "phone": "+51 1 234 5678",
-    "website": "https://example.com",
-    "rating": 5,
-    "lat": -12.1123,
-    "lng": -77.0435,
-    "imageUrl": "https://picsum.photos/400/300"
-  }'
-```
+1. Ejecuta `npm run dev`.
+2. Abre `http://localhost:3000`.
+3. Haz clic en `Ingresar con Google`.
+4. Verifica que al volver a la app aparezca tu perfil en la barra lateral.
+5. Prueba `GET /api/businesses` y `GET /api/businesses/me` desde el navegador o cliente HTTP con la misma sesión.
 
 ---
 
@@ -130,11 +93,11 @@ curl -X POST http://localhost:3001/api/businesses \
 - [ ] Cuenta creada en Neon.tech
 - [ ] Proyecto creado en Neon
 - [ ] DATABASE_URL copiada a `.env.local`
-- [ ] JWT_SECRET generado y agregado a `.env.local`
+- [ ] NEXTAUTH_SECRET generado y agregado a `.env.local`
+- [ ] GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET configurados
 - [ ] Script de inicialización ejecutado
 - [ ] Tablas creadas en Neon
-- [ ] Usuario registrado exitosamente
-- [ ] Usuario logueado exitosamente
+- [ ] Login con Google funcionando
 - [ ] Negocio creado exitosamente
 
 ---
@@ -159,9 +122,10 @@ npm install @neondatabase/serverless postgres
 - Ejecuta: `npx ts-node scripts/init-db.ts`
 - Verifica que no hay errores en la salida
 
-### Error: "Invalid token"
-- Asegúrate de que JWT_SECRET es correcto
-- Verifica que el token no ha expirado (7 días)
+### Error: "OAuth callback error"
+- Verifica `NEXTAUTH_URL`
+- Revisa que el callback de Google coincida con `/api/auth/callback/google`
+- Asegúrate de tener `NEXTAUTH_SECRET` y credenciales Google válidas
 
 ---
 
@@ -169,14 +133,11 @@ npm install @neondatabase/serverless postgres
 
 ```
 ✅ services/db.ts                 - Conexión a Neon
-✅ services/auth.ts               - Autenticación
+✅ pages/api/auth/[...nextauth].ts - Configuración NextAuth + Google
 ✅ services/api.ts                - Cliente HTTP
 ✅ services/businessService.ts    - Gestión de negocios
 ✅ contexts/AuthContext.tsx       - Context de autenticación
 ✅ components/AuthModal.tsx       - Modal de login/registro
-✅ pages/api/auth/register.ts     - Endpoint de registro
-✅ pages/api/auth/login.ts        - Endpoint de login
-✅ pages/api/auth/logout.ts       - Endpoint de logout
 ✅ pages/api/businesses/index.ts  - Endpoints de negocios
 ✅ pages/api/businesses/me.ts     - Negocios del usuario
 ✅ scripts/init-db.ts             - Script de inicialización
@@ -200,7 +161,7 @@ npm install @neondatabase/serverless postgres
 
 - **Documentación Neon:** https://neon.tech/docs
 - **Documentación PostgreSQL:** https://www.postgresql.org/docs
-- **JWT.io:** https://jwt.io
+- **NextAuth:** https://next-auth.js.org
 
 ---
 

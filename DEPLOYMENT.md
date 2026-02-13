@@ -53,7 +53,7 @@ git push -u origin main
 5. Configura:
    - **Build command:** `npm run build`
    - **Publish directory:** `.next`
-   - **Node version:** 18
+   - **Node version:** 20
 
 #### Paso 3: Agregar variables de entorno
 En Netlify Dashboard:
@@ -61,7 +61,10 @@ En Netlify Dashboard:
 2. Agrega las variables:
    ```
    DATABASE_URL=postgresql://...
-   JWT_SECRET=your-secret-key
+   NEXTAUTH_URL=https://limacentro.netlify.app
+   NEXTAUTH_SECRET=your-secret-key
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
    NEXT_PUBLIC_API_URL=https://limacentro.netlify.app
    ```
 
@@ -85,7 +88,10 @@ vercel
 #### Paso 3: Configurar variables de entorno
 ```bash
 vercel env add DATABASE_URL
-vercel env add JWT_SECRET
+vercel env add NEXTAUTH_URL
+vercel env add NEXTAUTH_SECRET
+vercel env add GOOGLE_CLIENT_ID
+vercel env add GOOGLE_CLIENT_SECRET
 ```
 
 ---
@@ -98,8 +104,13 @@ Asegúrate de configurar estas variables en tu plataforma de despliegue:
 # Neon Database
 DATABASE_URL=postgresql://user:password@ep-xxx.us-east-1.neon.tech/neondb?sslmode=require
 
-# JWT Secret (CAMBIAR EN PRODUCCIÓN)
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+# NextAuth
+NEXTAUTH_URL=https://limacentro.netlify.app
+NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # API URL
 NEXT_PUBLIC_API_URL=https://limacentro.netlify.app
@@ -127,16 +138,10 @@ NEXT_PUBLIC_API_URL=https://limacentro.netlify.app
 curl https://limacentro.netlify.app
 ```
 
-### 2. Probar registro de usuario
-```bash
-curl -X POST https://limacentro.netlify.app/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123",
-    "name": "Test User"
-  }'
-```
+### 2. Probar login con Google
+- Abre `https://limacentro.netlify.app`.
+- Haz clic en `Ingresar con Google`.
+- Verifica que vuelves autenticado y ves tu nombre/avatar.
 
 ### 3. Probar obtener negocios
 ```bash
@@ -148,7 +153,7 @@ Ve a https://limacentro.netlify.app y verifica que:
 - [ ] La página carga correctamente
 - [ ] El mapa se muestra
 - [ ] Los negocios se cargan
-- [ ] El login/registro funciona
+- [ ] El login con Google funciona
 - [ ] Puedes crear un negocio
 
 ---

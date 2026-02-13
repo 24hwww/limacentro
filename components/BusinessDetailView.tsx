@@ -107,6 +107,12 @@ export const BusinessDetailView: React.FC<BusinessDetailViewProps> = ({ business
                         <Navigation className="w-5 h-5" />
                         Cómo llegar
                     </a>
+                    <a
+                        href={`/negocio/${business.id}`}
+                        className="md:col-span-2 flex items-center justify-center gap-2 bg-white text-gray-800 py-3 rounded-xl font-semibold text-base hover:bg-gray-50 transition-colors border border-gray-300 focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 focus:outline-none"
+                    >
+                        Ver página pública del negocio
+                    </a>
                 </div>
             </div>
         </div>

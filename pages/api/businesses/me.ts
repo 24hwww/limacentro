@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getBusinessesByUserId } from '@/services/businessService';
-import { verifyToken } from '@/services/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { db } from '@/services/db';
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,21 +13,22 @@ export default async function handler(
   }
 
   try {
-    // Get token from cookie or header
-    const token = req.cookies.auth_token || req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
+    const session = await getServerSession(req, res, authOptions);
+    if (!session?.user?.email) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Verify token
-    const user = verifyToken(token);
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid token' });
+    const dbUser = await db.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!dbUser) {
+      return res.status(401).json({ error: 'Unauthorized user' });
     }
 
     // Get user's businesses
-    const businesses = await getBusinessesByUserId(user.id);
+    const businesses = await getBusinessesByUserId(dbUser.id);
 
     return res.status(200).json(businesses);
   } catch (error: any) {

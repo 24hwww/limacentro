@@ -1,20 +1,43 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# LimaCentro
 
-# Run and deploy your AI Studio app
+## Requisitos
 
-This contains everything you need to run your app locally.
+- Node.js `20.19+`
+- npm `10+`
 
-View your app in AI Studio: https://ai.studio/apps/drive/1cGtZzJRIlfHZHnotmIcp_uYe5OMIsxVp
+## Desarrollo local
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
+1. Instala dependencias:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Crea tu archivo local de variables:
+   `cp .env.example .env.local`
+3. Completa los valores reales en `.env.local` (no subir credenciales al repo).
+4. Ejecuta:
    `npm run dev`
+
+## Scripts
+
+- `npm run dev` - servidor local
+- `npm run build` - build de producción
+- `npm run start` - ejecutar build
+- `npm run lint` - linting
+- `npm test` - tests
+
+## Carga inicial de negocios (OSM)
+
+1. Crea entorno Python:
+   `python3 -m venv .venv && .venv/bin/pip install psycopg2-binary requests`
+2. Ejecuta importación:
+   `DATABASE_URL="..." .venv/bin/python scripts/import_lima_businesses_osm.py --limit 250`
+
+## SEO técnico
+
+- `robots.txt`: `/robots.txt`
+- `sitemap.xml`: `/sitemap.xml`
+- Fichas indexables: `/negocio/:id`
+
+## Notas de seguridad
+
+- `.env` y `.env.local` están ignorados por git.
+- Usa secretos distintos para cada entorno.
+- Rota cualquier secreto que se haya expuesto previamente.

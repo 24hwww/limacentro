@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Business, ViewState, Coordinates } from '../types';
 import { LIMA_CENTER, LIMA_DISTRICTS, CATEGORIES } from '../constants';
-import { getBusinesses, addBusiness } from '../services/mockDatabase';
+import { getBusinesses, createBusiness } from '../services/api';
 import { BusinessCard } from '../components/BusinessCard';
 import { BusinessForm } from '../components/BusinessForm';
 import { BusinessDetailView } from '../components/BusinessDetailView';
@@ -66,7 +66,16 @@ export default function HomePage() {
 
   // Initialize businesses
   useEffect(() => {
-    setBusinesses(getBusinesses());
+    const loadBusinesses = async () => {
+      try {
+        const data = await getBusinesses();
+        setBusinesses(data);
+      } catch (error) {
+        console.error('Failed to load businesses from API:', error);
+      }
+    };
+
+    void loadBusinesses();
   }, []);
 
   const filteredBusinesses = useMemo(() => {
@@ -80,7 +89,7 @@ export default function HomePage() {
   }, [businesses, searchQuery, selectedDistrict, selectedCategory]);
 
   const selectedBusiness = useMemo(() =>
-    businesses.find(b => b.id === activeBusinessId),
+    businesses.find(b => String(b.id) === activeBusinessId),
     [businesses, activeBusinessId]);
 
   // Handlers
@@ -108,17 +117,36 @@ export default function HomePage() {
     });
   };
 
-  const handleSaveBusiness = (newBusiness: Business) => {
-    const updated = addBusiness(newBusiness);
-    setBusinesses(updated);
-    setMapCenter({ lat: newBusiness.lat, lng: newBusiness.lng });
-    updateURL({ 
-      business: String(newBusiness.id), 
-      view: 'DETAILS',
-      q: searchQuery || null,
-      district: selectedDistrict || null,
-      category: selectedCategory || null
-    });
+  const handleSaveBusiness = async (newBusiness: Business) => {
+    try {
+      const payload = {
+        name: newBusiness.name,
+        category: newBusiness.category,
+        district: newBusiness.district,
+        address: newBusiness.address,
+        description: newBusiness.description,
+        phone: newBusiness.phone,
+        website: newBusiness.website,
+        rating: newBusiness.rating,
+        lat: newBusiness.lat,
+        lng: newBusiness.lng,
+        imageUrl: newBusiness.imageUrl,
+      };
+
+      const createdBusiness = await createBusiness(payload);
+      setBusinesses(prev => [createdBusiness, ...prev]);
+      setMapCenter({ lat: Number(createdBusiness.lat), lng: Number(createdBusiness.lng) });
+      updateURL({
+        business: String(createdBusiness.id),
+        view: 'DETAILS',
+        q: searchQuery || null,
+        district: selectedDistrict || null,
+        category: selectedCategory || null
+      });
+    } catch (error) {
+      console.error('Failed to create business:', error);
+      alert('No se pudo guardar el negocio. Verifica que hayas iniciado sesión con Google.');
+    }
   };
 
   const handleSearchChange = (value: string) => {
@@ -389,4 +417,3 @@ export default function HomePage() {
     </div>
   );
 };
-
