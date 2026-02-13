@@ -61,6 +61,15 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick, i
           {business.description}
         </p>
 
+        <a
+          href={`/negocio/${business.id}`}
+          onClick={(event) => event.stopPropagation()}
+          className="mt-2 inline-block text-xs sm:text-sm text-blue-700 hover:underline"
+          aria-label={`Ver ficha pública de ${business.name}`}
+        >
+          Ver ficha pública
+        </a>
+
         <div className="flex gap-3 sm:gap-4 mt-2 sm:mt-3">
           {business.phone && (
             <a 

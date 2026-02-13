@@ -23,6 +23,7 @@ export async function apiCall(
   try {
     const response = await fetch(url, {
       ...options,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -47,15 +48,13 @@ export async function apiCall(
  */
 export async function apiCallWithAuth(
   endpoint: string,
-  token: string,
+  token: string | null = null,
   options: ApiOptions = {}
 ): Promise<any> {
+  void token;
   return apiCall(endpoint, {
     ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
+    headers: options.headers,
   });
 }
 
@@ -67,29 +66,26 @@ export async function register(
   password: string,
   name: string
 ) {
-  return apiCall('/api/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({ email, password, name }),
-  });
+  void email;
+  void password;
+  void name;
+  throw new Error('Email/password registration removed. Use Google OAuth via NextAuth.');
 }
 
 /**
  * Iniciar sesión
  */
 export async function login(email: string, password: string) {
-  return apiCall('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
+  void email;
+  void password;
+  throw new Error('Email/password login removed. Use Google OAuth via NextAuth.');
 }
 
 /**
  * Cerrar sesión
  */
 export async function logout() {
-  return apiCall('/api/auth/logout', {
-    method: 'POST',
-  });
+  throw new Error('Use NextAuth signOut() instead of legacy logout().');
 }
 
 /**
@@ -104,7 +100,10 @@ export async function getBusinesses() {
 /**
  * Crear un nuevo negocio
  */
-export async function createBusiness(token: string, businessData: any) {
+export async function createBusiness(
+  businessData: any,
+  token: string | null = null
+) {
   return apiCallWithAuth('/api/businesses', token, {
     method: 'POST',
     body: JSON.stringify(businessData),
@@ -114,7 +113,7 @@ export async function createBusiness(token: string, businessData: any) {
 /**
  * Obtener negocios de un usuario
  */
-export async function getUserBusinesses(token: string) {
+export async function getUserBusinesses(token: string | null = null) {
   return apiCallWithAuth('/api/businesses/me', token, {
     method: 'GET',
   });
