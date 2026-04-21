@@ -1,40 +1,10 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
+"use client";
+
+import React, { useRef, useEffect } from 'react';
+import { Map, MapMarker, MarkerContent, MarkerPopup } from '@/components/ui/map';
 import { Business, Coordinates } from '../types';
 import { LIMA_CENTER } from '../constants';
-
-// Configuración de iconos de Leaflet
-const fixLeafletIcons = () => {
-  // @ts-ignore
-  delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  });
-};
-
-// Componentes auxiliares del mapa
-const MapController = ({ center }: { center: Coordinates }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView([center.lat, center.lng], 13, {
-      animate: true,
-      duration: 1.5
-    });
-  }, [center, map]);
-  return null;
-};
-
-const MapClickHandler = ({ onMapClick }: { onMapClick: () => void }) => {
-  useMapEvents({
-    click: () => {
-      onMapClick();
-    },
-  });
-  return null;
-};
+import type MapLibreGL from 'maplibre-gl';
 
 interface MapBoardProps {
   center: Coordinates;
@@ -44,40 +14,81 @@ interface MapBoardProps {
 }
 
 const MapBoard: React.FC<MapBoardProps> = ({ center, businesses, onMarkerClick, onMapBackgroundClick }) => {
+  const mapRef = useRef<MapLibreGL.Map | null>(null);
 
+  // Fly to center when it changes
   useEffect(() => {
-    fixLeafletIcons();
-  }, []);
+    if (mapRef.current && center) {
+      mapRef.current.flyTo({
+        center: [center.lng, center.lat],
+        zoom: 14,
+        duration: 1500,
+      });
+    }
+  }, [center]);
+
+  const handleMapClick = () => {
+    onMapBackgroundClick();
+  };
 
   return (
-    <MapContainer
-      center={[LIMA_CENTER.lat, LIMA_CENTER.lng]}
+    <Map
+      ref={mapRef}
+      center={[LIMA_CENTER.lng, LIMA_CENTER.lat]}
       zoom={12}
-      scrollWheelZoom={true}
-      zoomControl={false}
-      style={{ height: '100%', width: '100%', background: '#262626' }}
+      theme="dark"
+      className="h-full w-full"
+      onClick={handleMapClick}
     >
-      <TileLayer
-        attribution=''
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
-      />
-      <MapController center={center} />
-      <MapClickHandler onMapClick={onMapBackgroundClick} />
-
-      {businesses.map(b => (
-        <Marker
-          key={b.id}
-          position={[b.lat, b.lng]}
-          eventHandlers={{
-            click: (e) => {
-              L.DomEvent.stopPropagation(e.originalEvent);
-              onMarkerClick(b);
-            }
+      {businesses.map((business) => (
+        <MapMarker
+          key={business.id}
+          longitude={business.lng}
+          latitude={business.lat}
+          onClick={(e) => {
+            e.stopPropagation();
+            onMarkerClick(business);
           }}
-        />
+        >
+          <MarkerContent>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-background transition-transform hover:scale-110">
+              <MarkerIcon category={business.category} />
+            </div>
+          </MarkerContent>
+          <MarkerPopup closeButton className="min-w-[200px]">
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm">{business.name}</h3>
+              <p className="text-xs text-muted-foreground">{business.category}</p>
+              <p className="text-xs text-muted-foreground">{business.district}</p>
+              {business.rating > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-500">★</span>
+                  <span className="text-xs">{business.rating.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
+          </MarkerPopup>
+        </MapMarker>
       ))}
-    </MapContainer>
+    </Map>
   );
+};
+
+// Icon component based on category
+const MarkerIcon = ({ category }: { category: string }) => {
+  const iconMap: Record<string, string> = {
+    'Restaurante': '🍽️',
+    'Hotel': '🏨',
+    'Tienda': '🛒',
+    'Servicios': '🔧',
+    'Salud': '🏥',
+    'Educación': '📚',
+    'Tecnología': '💻',
+    'Turismo': '🗺️',
+    'Otros': '📍',
+  };
+  
+  return <span className="text-sm">{iconMap[category] || '📍'}</span>;
 };
 
 export default MapBoard;
