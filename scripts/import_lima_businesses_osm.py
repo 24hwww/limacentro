@@ -266,9 +266,9 @@ def insert_businesses(cur, user_id: int, businesses: List[ParsedBusiness]) -> Tu
         cur.execute(
             """
             INSERT INTO businesses
-              (user_id, name, category, district, address, description, phone, website, rating, lat, lng, image_url)
+              (user_id, name, category, district, address, description, phone, website, rating, lat, lng, image_url, source, source_id)
             VALUES
-              (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+              (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             (
                 user_id,
@@ -283,6 +283,8 @@ def insert_businesses(cur, user_id: int, businesses: List[ParsedBusiness]) -> Tu
                 b.lat,
                 b.lng,
                 b.image_url,
+                "osm",
+                b.source_id,
             ),
         )
         inserted += 1

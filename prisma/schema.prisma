@@ -1,11 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "bun"
 }
 
 datasource db {
   provider = "postgresql"
 }
-
 
 model User {
   id           Int        @id @default(autoincrement())
@@ -35,6 +36,8 @@ model Business {
   lat         Decimal  @db.Decimal(10, 8)
   lng         Decimal  @db.Decimal(11, 8)
   imageUrl    String?  @map("image_url")
+  source      String?  // origen del dato: "user" | "osm" | "overture" | "gmaps"
+  sourceId    String?  @map("source_id")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -42,4 +45,5 @@ model Business {
   @@index([userId], map: "idx_businesses_user_id")
   @@index([district], map: "idx_businesses_district")
   @@index([category], map: "idx_businesses_category")
+  @@index([source, sourceId], map: "idx_businesses_source")
 }

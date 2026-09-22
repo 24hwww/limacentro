@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: ***REMOVED***/sitemap.xml
+Sitemap: https://limacentro.com/sitemap.xml
