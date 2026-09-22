@@ -4,6 +4,7 @@ import {
   getAllBusinesses,
 } from '@/services/businessService'
 import { getSessionUser } from '@/lib/session'
+import { rateLimit } from '@/lib/rateLimit'
 import { businessInputSchema } from '@/lib/validation'
 
 export const Route = createFileRoute('/api/businesses/')({
@@ -23,6 +24,9 @@ export const Route = createFileRoute('/api/businesses/')({
       },
 
       POST: async ({ request }) => {
+        const limited = rateLimit(request, { limit: 30, windowMs: 60_000 })
+        if (limited) return limited
+
         const user = await getSessionUser(request)
         if (!user) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })

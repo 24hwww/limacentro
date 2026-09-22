@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { rateLimit } from '@/lib/rateLimit'
 
 // Almacenamiento en memoria de usuarios activos.
 // Funciona porque Bun corre un proceso de larga duración (a diferencia de
@@ -21,6 +22,9 @@ export const Route = createFileRoute('/api/online-users')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const limited = rateLimit(request, { limit: 120, windowMs: 60_000 })
+        if (limited) return limited
+
         const userId =
           request.headers.get('x-user-id') ||
           request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||

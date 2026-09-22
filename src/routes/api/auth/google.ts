@@ -7,11 +7,15 @@ import {
   verifyGoogleCredential,
 } from '@/lib/auth'
 import { db } from '@/lib/db'
+import { rateLimit } from '@/lib/rateLimit'
 
 export const Route = createFileRoute('/api/auth/google')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const limited = rateLimit(request, { limit: 20, windowMs: 60_000 })
+        if (limited) return limited
+
         let credential: string | undefined
         try {
           const body = await request.json()

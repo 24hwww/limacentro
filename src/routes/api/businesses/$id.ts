@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { deleteBusiness, updateBusiness } from '@/services/businessService'
 import { getSessionUser } from '@/lib/session'
+import { rateLimit } from '@/lib/rateLimit'
 import { businessInputSchema } from '@/lib/validation'
 
 function parseId(raw: string | undefined): number | null {
@@ -12,6 +13,9 @@ export const Route = createFileRoute('/api/businesses/$id')({
   server: {
     handlers: {
       PUT: async ({ request, params }) => {
+        const limited = rateLimit(request, { limit: 30, windowMs: 60_000 })
+        if (limited) return limited
+
         const user = await getSessionUser(request)
         if (!user) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -59,6 +63,9 @@ export const Route = createFileRoute('/api/businesses/$id')({
       },
 
       DELETE: async ({ request, params }) => {
+        const limited = rateLimit(request, { limit: 30, windowMs: 60_000 })
+        if (limited) return limited
+
         const user = await getSessionUser(request)
         if (!user) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 })
